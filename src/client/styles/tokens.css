@@ -1,0 +1,360 @@
+/* Design tokens — Operator Console (dark default, light optional) */
+:root[data-theme="dark"],
+:root {
+  --bg-0: #0b0d12;
+  --bg-1: #11141b;
+  --bg-2: #171b25;
+  --bg-3: #1e2330;
+  --border: #222836;
+  --border-strong: #2e3447;
+
+  --text-hi: #e6e9f2;
+  --text-mid: #a6adc0;
+  --text-lo: #5b6377;
+
+  --primary: #7c5cff;
+  --primary-strong: #6b4be8;   /* hover for primary buttons */
+  --primary-soft: rgba(124, 92, 255, 0.18);
+  --primary-ring: rgba(124, 92, 255, 0.32);
+  --secondary: #22d3ee;
+
+  --success: #34d399;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --info: #60a5fa;
+  --queued: #5b6377;
+  --running: #7c5cff;
+
+  /* 状态色 — 软底（用于 trend / status card 等） */
+  --success-soft: rgba(52, 211, 153, 0.12);
+  --warning-soft: rgba(251, 191, 36, 0.12);
+  --info-soft: rgba(96, 165, 250, 0.12);
+  --error-soft: rgba(248, 113, 113, 0.1);
+  --success-pulse: rgba(52, 211, 153, 0.18);
+  --error-pulse: rgba(248, 113, 113, 0.1);
+
+  /* 中性 tint — 在 dark 模式用白色叠加，light 模式翻成黑色叠加
+     用于 hover/grid/shimmer 等"微亮"效果 */
+  --tint-1: rgba(255, 255, 255, 0.04);   /* hover 态背景 */
+  --tint-2: rgba(255, 255, 255, 0.05);   /* 浅分割线 / 容器边界 */
+  --tint-3: rgba(255, 255, 255, 0.18);   /* shimmer 高光 */
+  --tint-4: rgba(255, 255, 255, 0.02);   /* 网格 / 微弱背景层 */
+  --tint-5: rgba(255, 255, 255, 0.012);  /* 更细网格 */
+  --tint-6: rgba(255, 255, 255, 0.2);    /* logo 高光带 */
+  --tint-7: rgba(255, 255, 255, 0.35);   /* icon-box hover */
+
+  /* 浮起层（frosted glass）— dark 模式为深色半透，light 模式为白色半透 */
+  --bg-elev: rgba(17, 20, 27, 0.95);     /* topbar */
+  --bg-elev-2: rgba(11, 13, 18, 0.6);    /* sidebar bottom */
+  --bg-card-elev: rgba(17, 20, 27, 0.6);  /* card 渐变底 */
+  --bg-card-soft: rgba(17, 20, 27, 0.4);  /* stat card 渐变底 */
+  --bg-card-soft-2: rgba(17, 20, 27, 0.5); /* stat-card hover shadow fallback */
+
+  /* 主色泛光（半径/径向） */
+  --primary-glow-1: rgba(124, 92, 255, 0.07);  /* 页面径向 */
+  --primary-glow-2: rgba(124, 92, 255, 0.05);  /* empty / 容器 */
+  --primary-glow-3: rgba(124, 92, 255, 0.02);  /* empty 渐变弱端 */
+  --primary-glow-4: rgba(124, 92, 255, 0.14);  /* hero 径向 */
+  --primary-glow-5: rgba(124, 92, 255, 0.18);  /* hero 强 / login glow */
+  --primary-glow-6: rgba(124, 92, 255, 0.45);  /* login 阴影 */
+  --primary-glow-7: rgba(124, 92, 255, 0.04);  /* active 渐变弱端 / 空态 icon-box hover */
+  --primary-glow-8: rgba(124, 92, 255, 0.1);   /* stat 渐变 */
+  --primary-glow-9: rgba(124, 92, 255, 0.22);  /* 阴影/悬浮 */
+  --primary-glow-10: rgba(124, 92, 255, 0.5);  /* logo 边缘 */
+  --primary-glow-11: rgba(124, 92, 255, 0.35); /* logo 投影 */
+  --primary-glow-12: rgba(124, 92, 255, 0.4);  /* avatar 边缘 */
+  --primary-glow-13: rgba(124, 92, 255, 0.25); /* badge 描边 */
+  --primary-glow-14: rgba(124, 92, 255, 0.28); /* active icon-box 描边 */
+  --primary-glow-15: rgba(124, 92, 255, 0.2);  /* empty icon-box 描边 */
+  --primary-glow-16: rgba(124, 92, 255, 0.3);  /* empty icon-box 描边 2 */
+
+  /* active 渐变与未读底 */
+  --active-grad-start: rgba(124, 92, 255, 0.12);
+  --active-grad-end: rgba(124, 92, 255, 0.04);
+  --active-grad-start-h: rgba(124, 92, 255, 0.18);
+  --active-grad-end-h: rgba(124, 92, 255, 0.06);
+  --active-bg: rgba(124, 92, 255, 0.18);
+  --unread-bg: rgba(124, 92, 255, 0.04);
+  --unread-glow: rgba(124, 92, 255, 0.5);
+
+  /* 模态遮罩 */
+  --overlay: rgba(2, 4, 12, 0.6);
+
+  /* login / brand-specific 渐变（dark 强，light 弱） */
+  --brand-grad: linear-gradient(135deg, #15182a 0%, #0d0f18 100%);
+  --logo-grad: linear-gradient(135deg, #7c5cff 0%, #4d3eb8 100%);
+  --avatar-grad: linear-gradient(135deg, #7c5cff 0%, #4d3eb8 100%);
+
+  --r-badge: 2px;
+  --r-input: 4px;
+  --r-card: 6px;
+  --r-modal: 8px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  --row-h: 32px;
+  --ctrl-h: 28px;
+  --card-pad: 16px;
+
+  --font-ui: "Geist", -apple-system, BlinkMacSystemFont, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, "SF Mono",
+    Consolas, monospace;
+
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-32: 32px;
+
+  --shadow-1: 0 1px 0 rgba(0, 0, 0, 0.4);
+  /* 阴影按背景染色 — bg-0 偏冷蓝黑，阴影用接近的色调而非纯黑 */
+  --shadow-modal: 0 16px 40px -8px rgba(2, 4, 12, 0.7),
+                  0 2px 6px rgba(2, 4, 12, 0.4);
+  --shadow-elev: 0 8px 24px -6px rgba(2, 4, 12, 0.55);
+  --shadow-glow: 0 0 0 1px rgba(124, 92, 255, 0.18),
+                 0 8px 28px -4px rgba(124, 92, 255, 0.18);
+
+  /* z-index 尺度 */
+  --z-base: 1;
+  --z-sticky: 10;
+  --z-topbar: 20;
+  --z-dropdown: 30;
+  --z-modal: 100;
+  --z-toast: 1000;
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-micro: 80ms;
+  --dur-short: 160ms;
+  --dur-med: 240ms;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg-0: #f7f8fa;
+  --bg-1: #ffffff;
+  --bg-2: #f3f5f9;
+  --bg-3: #eaeef5;
+  --border: #e4e7ee;
+  --border-strong: #c8cdd9;
+  --text-hi: #0b0d12;
+  --text-mid: #4a5160;
+  --text-lo: #8a92a2;
+
+  --primary: #6b4be8;        /* 亮底上用更深的紫 */
+  --primary-strong: #5a3cd4;
+  --primary-soft: rgba(107, 75, 232, 0.1);
+  --primary-ring: rgba(107, 75, 232, 0.28);
+  --secondary: #0891b2;
+  --running: #6b4be8;
+
+  /* 状态色 — 暗化版以保证对比度 */
+  --success: #059669;
+  --warning: #d97706;
+  --error: #dc2626;
+  --info: #2563eb;
+  --queued: #8a92a2;
+
+  --success-soft: rgba(5, 150, 105, 0.1);
+  --warning-soft: rgba(217, 119, 6, 0.1);
+  --info-soft: rgba(37, 99, 235, 0.1);
+  --error-soft: rgba(220, 38, 38, 0.08);
+  --success-pulse: rgba(5, 150, 105, 0.16);
+  --error-pulse: rgba(220, 38, 38, 0.08);
+
+  /* 中性 tint 翻面 — 在白底上用深色叠加 */
+  --tint-1: rgba(11, 13, 18, 0.04);
+  --tint-2: rgba(11, 13, 18, 0.06);
+  --tint-3: rgba(255, 255, 255, 0.55);   /* progress-bar 上的高光保持白色 */
+  --tint-4: rgba(11, 13, 18, 0.035);
+  --tint-5: rgba(11, 13, 18, 0.02);
+  --tint-6: rgba(255, 255, 255, 0.35);
+  --tint-7: rgba(11, 13, 18, 0.06);
+
+  /* 浮起层 — 亮底上为白色半透，更柔 */
+  --bg-elev: rgba(255, 255, 255, 0.85);
+  --bg-elev-2: rgba(247, 248, 250, 0.7);
+  --bg-card-elev: rgba(247, 248, 250, 0.5);
+  --bg-card-soft: rgba(247, 248, 250, 0.4);
+  --bg-card-soft-2: rgba(11, 13, 18, 0.05);
+
+  /* 主色泛光 — 浅色背景上的紫色保持可见但更克制 */
+  --primary-glow-1: rgba(107, 75, 232, 0.06);
+  --primary-glow-2: rgba(107, 75, 232, 0.04);
+  --primary-glow-3: rgba(107, 75, 232, 0.02);
+  --primary-glow-4: rgba(107, 75, 232, 0.1);
+  --primary-glow-5: rgba(107, 75, 232, 0.12);
+  --primary-glow-6: rgba(107, 75, 232, 0.3);
+  --primary-glow-7: rgba(107, 75, 232, 0.03);
+  --primary-glow-8: rgba(107, 75, 232, 0.08);
+  --primary-glow-9: rgba(107, 75, 232, 0.16);
+  --primary-glow-10: rgba(107, 75, 232, 0.35);
+  --primary-glow-11: rgba(107, 75, 232, 0.22);
+  --primary-glow-12: rgba(107, 75, 232, 0.3);
+  --primary-glow-13: rgba(107, 75, 232, 0.2);
+  --primary-glow-14: rgba(107, 75, 232, 0.22);
+  --primary-glow-15: rgba(107, 75, 232, 0.16);
+  --primary-glow-16: rgba(107, 75, 232, 0.2);
+
+  --active-grad-start: rgba(107, 75, 232, 0.1);
+  --active-grad-end: rgba(107, 75, 232, 0.03);
+  --active-grad-start-h: rgba(107, 75, 232, 0.14);
+  --active-grad-end-h: rgba(107, 75, 232, 0.05);
+  --active-bg: rgba(107, 75, 232, 0.14);
+  --unread-bg: rgba(107, 75, 232, 0.05);
+  --unread-glow: rgba(107, 75, 232, 0.4);
+
+  --overlay: rgba(11, 13, 18, 0.4);
+
+  /* 亮色 logo/avatar 改用纯紫渐变（亮底上仍清晰） */
+  --brand-grad: linear-gradient(135deg, #efeafe 0%, #f7f5ff 100%);
+  --logo-grad: linear-gradient(135deg, #7c5cff 0%, #4d3eb8 100%);
+  --avatar-grad: linear-gradient(135deg, #7c5cff 0%, #4d3eb8 100%);
+
+  /* 阴影在白底上需要更深才看得见 */
+  --shadow-1: 0 1px 0 rgba(11, 13, 18, 0.04);
+  --shadow-modal: 0 16px 40px -8px rgba(11, 13, 18, 0.18),
+                  0 2px 6px rgba(11, 13, 18, 0.08);
+  --shadow-elev: 0 8px 24px -6px rgba(11, 13, 18, 0.12);
+  --shadow-glow: 0 0 0 1px rgba(107, 75, 232, 0.18),
+                 0 8px 28px -4px rgba(107, 75, 232, 0.18);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: var(--font-ui);
+  font-size: var(--fs-13);
+  line-height: 1.5;
+  background: var(--bg-0);
+  color: var(--text-hi);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "ss01", "cv11";
+  transition: background-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary-ring);
+  outline-offset: 2px;
+}
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--dur-micro) var(--ease-out);
+}
+a:hover {
+  text-decoration: none;
+  color: var(--secondary);
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 6px;
+  border: 2px solid var(--bg-0);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-lo);
+  background-clip: padding-box;
+  border: 2px solid var(--bg-0);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* 路由切换淡入 */
+@keyframes route-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.main > * {
+  animation: route-in var(--dur-med) var(--ease-out);
+}
+
+/* 跳过导航 — 默认视觉隐藏，focus 时落到屏幕左上 */
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 9999;
+  padding: 8px 14px;
+  background: var(--bg-1);
+  color: var(--text-hi);
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--dur-short) var(--ease-out);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--primary-ring);
+}
+
+/* numerics */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.right {
+  text-align: right;
+}
+.muted {
+  color: var(--text-mid);
+}
+.dim {
+  color: var(--text-lo);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.spacer {
+  flex: 1;
+}

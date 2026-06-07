@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>运行日志 · Legado</title>
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('legado-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  })();
+</script>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #ffffff; --surface-2: #fafbfc;
+    --surface-3: #f6f7f9; --surface-4: #f1f3f6;
+    --fg: #181d26; --fg-2: #333333; --muted: rgba(4, 14, 32, 0.69); --meta: var(--muted);
+    --border: #e0e2e6; --border-soft: #eef0f3; --track: #d4d6dc;
+    --accent: #1b61c9;
+    --accent-soft: rgba(27, 97, 201, 0.08);
+    --accent-soft-2: rgba(27, 97, 201, 0.10);
+    --accent-soft-3: rgba(27, 97, 201, 0.12);
+    --accent-on: #ffffff; --accent-hover: #254fad;
+    --accent-active: color-mix(in oklab, var(--accent), black 14%);
+    --success: #006400; --success-soft: rgba(0, 100, 0, 0.08);
+    --success-tint: rgba(0, 100, 0, 0.10);
+    --warn: #eab308; --warn-soft: rgba(234, 179, 8, 0.12); --warn-ink: #92670a; --warn-tint: rgba(234, 179, 8, 0.16);
+    --danger: #dc2626; --danger-soft: rgba(220, 38, 38, 0.08); --danger-tint: rgba(220, 38, 38, 0.10);
+    --hl: rgba(234, 179, 8, 0.25);
+    --font-display: "Haas Groot Disp", Haas, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-body: Haas, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+    --text-xs: 12px; --text-sm: 14px; --text-base: 16px; --text-lg: 20px;
+    --text-xl: 24px; --text-2xl: 32px; --text-3xl: 40px;
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+    --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
+    --radius-sm: 12px; --radius-md: 16px; --radius-pill: 9999px;
+    --elev-raised:
+      0 0 1px rgba(0, 0, 0, 0.32), 0 0 2px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(45, 127, 249, 0.28), inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+    --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 70%);
+    --motion-fast: 150ms; --motion-base: 200ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    --bg: #0d1117; --surface: #161b22; --surface-2: #1c2128;
+    --surface-3: #22272e; --surface-4: #2d333b;
+    --fg: #e6edf3; --fg-2: #c9d1d9; --muted: rgba(230, 237, 243, 0.55); --meta: var(--muted);
+    --border: #30363d; --border-soft: #21262d; --track: #484f58;
+    --accent: #4493f8;
+    --accent-soft: rgba(68, 147, 248, 0.16);
+    --accent-soft-2: rgba(68, 147, 248, 0.20);
+    --accent-soft-3: rgba(68, 147, 248, 0.24);
+    --accent-on: #0d1117; --accent-hover: #58a6ff;
+    --accent-active: color-mix(in oklab, var(--accent), white 10%);
+    --success: #3fb950; --success-soft: rgba(63, 185, 80, 0.15); --success-tint: rgba(63, 185, 80, 0.18);
+    --warn: #d29922; --warn-soft: rgba(210, 153, 34, 0.18); --warn-ink: #e3b341; --warn-tint: rgba(210, 153, 34, 0.24);
+    --danger: #f85149; --danger-soft: rgba(248, 81, 73, 0.15); --danger-tint: rgba(248, 81, 73, 0.18);
+    --hl: rgba(210, 153, 34, 0.30);
+    --elev-raised:
+      0 0 1px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.4),
+      0 1px 3px rgba(68, 147, 248, 0.28), inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body); color: var(--fg); background: var(--bg); -webkit-font-smoothing: antialiased; letter-spacing: 0.08px; transition: background var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hover); }
+  a:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
+
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar { border-right: 1px solid var(--border); background: var(--surface-2); padding: var(--space-6) var(--space-4); position: sticky; top: 0; height: 100vh; overflow-y: auto; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 18px; font-weight: 500; color: var(--fg); margin-bottom: var(--space-8); }
+  .brand-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; color: var(--accent-on); font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+  .nav-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); padding: 0 var(--space-3); margin: var(--space-5) 0 var(--space-2); }
+  .nav { list-style: none; padding: 0; margin: 0; }
+  .nav a { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; color: var(--fg-2); font-size: 14px; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+  .nav a:hover { background: var(--surface-3); color: var(--fg); }
+  .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+  .nav svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; flex: 0 0 18px; }
+  .nav .badge { margin-left: auto; font-family: var(--font-mono); font-size: 11px; background: var(--surface-4); color: var(--fg-2); padding: 1px 7px; border-radius: var(--radius-pill); }
+  .nav a[aria-current="page"] .badge { background: var(--accent-soft-3); color: var(--accent); }
+  .nav-foot { margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid var(--border-soft); }
+  .nav-foot small { display: block; color: var(--muted); font-size: 12px; padding: 4px 12px; }
+  .nav-foot small + small { margin-top: 2px; }
+
+  .topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 5; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .topbar h1 { margin: 0; font-size: 18px; font-weight: 500; font-family: var(--font-display); }
+  .topbar .crumb { color: var(--muted); font-size: 13px; }
+  .topbar .spacer { flex: 1; }
+  .topbar .user { display: flex; align-items: center; gap: 10px; padding: 4px 10px 4px 4px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .topbar .user .avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); color: var(--accent-on); display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+  .topbar .user span { font-size: 13px; }
+
+  .icon-btn { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); color: var(--fg-2); cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .icon-btn:hover { background: var(--surface-3); color: var(--fg); }
+  .icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .icon-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .icon-btn .sun, .icon-btn .moon { display: none; }
+  [data-theme="light"] .icon-btn .sun, :root:not([data-theme]) .icon-btn .sun { display: block; }
+  [data-theme="dark"] .icon-btn .moon { display: block; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border-radius: var(--radius-sm); font: 500 14px/1 var(--font-body); letter-spacing: 0.08px; border: 1px solid transparent; cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .btn-primary { background: var(--accent); color: var(--accent-on); }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--surface); color: var(--fg); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--surface-3); }
+  .btn-ghost { background: transparent; color: var(--fg-2); }
+  .btn-ghost:hover { background: var(--surface-4); color: var(--fg); }
+  .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .btn.is-active { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+  .btn.is-active:hover { background: var(--accent-hover); }
+
+  .input { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; color: var(--fg); transition: background var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .input svg { width: 16px; height: 16px; stroke: var(--muted); fill: none; stroke-width: 1.8; }
+  .input input { border: 0; outline: 0; flex: 1; background: transparent; font: inherit; color: inherit; }
+  .input:focus-within { border-color: var(--accent); box-shadow: var(--focus-ring); }
+
+  .main { min-width: 0; }
+  .content { padding: var(--space-8) var(--space-6) var(--space-12); }
+  .content > * + * { margin-top: var(--space-5); }
+
+  .page-head { display: flex; align-items: end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+  .page-head h2 { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 500; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .page-head p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  /* Layout: filters + stream */
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+  .filter-pane { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--elev-raised); padding: var(--space-4); position: sticky; top: 88px; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .filter-pane h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 8px; padding: 0 4px; }
+  .filter-pane h4:not(:first-child) { margin-top: var(--space-4); }
+  .src-list { list-style: none; padding: 0; margin: 0; }
+  .src-list li { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: background var(--motion-fast) var(--ease-standard); }
+  .src-list li:hover { background: var(--surface-3); }
+  .src-list .check { width: 14px; height: 14px; border: 1.5px solid var(--border); border-radius: 3px; background: var(--surface); flex: 0 0 14px; transition: background var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .src-list .check.on { background: var(--accent); border-color: var(--accent); position: relative; }
+  .src-list .check.on::after { content: ""; position: absolute; left: 3px; top: 0; width: 4px; height: 8px; border: solid var(--accent-on); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+  .src-list .name { flex: 1; }
+  .src-list .count { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+  .stream { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--elev-raised); overflow: hidden; min-width: 0; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .stream-bar { display: flex; align-items: center; gap: var(--space-3); padding: 10px 12px; border-bottom: 1px solid var(--border-soft); background: var(--surface-2); transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .level-tabs { display: flex; gap: 4px; overflow-x: auto; }
+  .level-tabs .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 28px; padding: 0 10px; border-radius: var(--radius-pill);
+    background: var(--surface); border: 1px solid var(--border); color: var(--fg-2);
+    font-family: var(--font-mono); font-size: 11px; cursor: pointer; letter-spacing: 0.04em;
+    transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard);
+    white-space: nowrap;
+  }
+  .level-tabs .chip[aria-selected="true"] { background: var(--fg); color: var(--surface); border-color: var(--fg); }
+  .level-tabs .chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .level-tabs .chip .dot.info { background: var(--accent); }
+  .level-tabs .chip .dot.warn { background: var(--warn); }
+  .level-tabs .chip .dot.error { background: var(--danger); }
+  .level-tabs .chip .dot.debug { background: var(--muted); }
+  .level-tabs .chip .dot.success { background: var(--success); }
+  .level-tabs .chip .num { opacity: 0.6; }
+
+  .stream-body { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; max-height: 70vh; overflow-y: auto; min-width: 0; }
+  .log-line { display: grid; grid-template-columns: 56px 96px 60px minmax(0, 1fr); gap: 12px; padding: 4px 14px; border-left: 3px solid transparent; min-width: 0; transition: background var(--motion-fast) var(--ease-standard); }
+  .log-line:hover { background: var(--surface-2); }
+  .log-line .ln { color: var(--muted); text-align: right; user-select: none; }
+  .log-line .ts { color: var(--muted); }
+  .log-line .lvl { font-size: 10px; padding: 1px 6px; border-radius: 4px; text-align: center; text-transform: uppercase; letter-spacing: 0.04em; align-self: center; height: 18px; line-height: 16px; font-weight: 600; }
+  .log-line .lvl.info { background: var(--accent-soft-2); color: var(--accent); }
+  .log-line .lvl.warn { background: var(--warn-tint); color: var(--warn-ink); }
+  .log-line .lvl.error { background: var(--danger-tint); color: var(--danger); }
+  .log-line .lvl.debug { background: var(--surface-4); color: var(--muted); }
+  .log-line .lvl.success { background: var(--success-tint); color: var(--success); }
+  .log-line .msg { color: var(--fg-2); min-width: 0; overflow-wrap: anywhere; }
+  .log-line .msg .src { color: var(--accent); margin-right: 6px; }
+  .log-line .msg .hl { background: var(--hl); padding: 0 2px; border-radius: 2px; }
+  .log-line.warn { border-left-color: var(--warn); }
+  .log-line.error { border-left-color: var(--danger); }
+  .log-line.success { border-left-color: var(--success); }
+  .log-line.info { border-left-color: var(--accent); }
+
+  .stream-foot { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-top: 1px solid var(--border-soft); background: var(--surface-2); font-family: var(--font-mono); font-size: 11px; color: var(--muted); transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .stream-foot .live { display: inline-flex; align-items: center; }
+  .stream-foot .blink { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); margin-right: 6px; animation: pulse 1.6s ease-in-out infinite; }
+  .stream-foot .live.off .blink { background: var(--muted); animation: none; opacity: 0.5; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  @media (max-width: 1280px) {
+    .layout { grid-template-columns: 220px minmax(0, 1fr); }
+  }
+  @media (max-width: 1024px) {
+    .layout { grid-template-columns: 1fr; }
+    .filter-pane { position: static; }
+  }
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; padding: var(--space-4); border-right: 0; border-bottom: 1px solid var(--border); }
+    .sidebar .nav-label, .sidebar .nav-foot, .nav .badge { display: none; }
+    .nav { display: flex; flex-wrap: wrap; gap: 4px; }
+    .nav a { padding: 6px 10px; font-size: 12px; }
+    .content { padding: var(--space-5) var(--space-4) var(--space-8); }
+    .topbar { padding: var(--space-3) var(--space-4); }
+    .topbar h1 { font-size: 16px; }
+    .topbar .crumb { display: none; }
+    .page-head h2 { font-size: 24px; }
+    .log-line { grid-template-columns: 36px 80px 52px 1fr; gap: 8px; padding: 4px 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+
+  .toast { position: fixed; bottom: var(--space-6); right: var(--space-6); z-index: 200; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--elev-hover); padding: 12px 20px; font-size: 14px; color: var(--fg); display: flex; align-items: center; gap: 10px; animation: toastIn var(--motion-base) var(--ease-standard); }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast svg { width: 18px; height: 18px; stroke: var(--success); fill: none; stroke-width: 1.8; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">L</span><span>Legado</span></div>
+    <div class="nav-label">控制台</div>
+    <ul class="nav" role="navigation">
+      <li><a href="index.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>屏幕索引</a></li>
+      <li><a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M3 12l3-7h4l3 7 3-7h4l3 7"/><path d="M3 19h18"/></svg>总览仪表盘</a></li>
+      <li><a href="sources.html"><svg viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 013 3v13H7a3 3 0 01-3-3V4z"/><path d="M4 17h15"/></svg>书源管理<span class="badge">15</span></a></li>
+      <li><a href="tasks.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>任务列表<span class="badge">23</span></a></li>
+      <li><a href="logs.html" aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l2 2 4-4M7 15h10"/></svg>运行日志</a></li>
+    </ul>
+    <div class="nav-label">内容</div>
+    <ul class="nav">
+      <li><a href="preview.html"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 9h18M7 13h6M7 16h10"/></svg>章节预览</a></li>
+      <li><a href="settings.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>系统设置</a></li>
+    </ul>
+    <div class="nav-foot"><small>v2.0.4 · build a7c2e1f</small><small>本地服务 · 在线</small></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>运行日志</h1>
+      <span class="crumb">/ 实时 · 12,847 行</span>
+      <div class="spacer"></div>
+      <button class="icon-btn" type="button" id="themeToggle" aria-label="切换主题" title="切换主题">
+        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+      <button class="btn btn-ghost is-active" id="liveBtn" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
+        实时
+      </button>
+      <button class="btn btn-secondary" type="button"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>导出</button>
+      <button class="btn btn-secondary" type="button"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4M16 6V4M3 10h18M5 14h14M7 18h10"/></svg>保留 7 天</button>
+      <div class="user"><span class="avatar">R</span><span>rui@legado.local</span></div>
+    </div>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h2>运行日志</h2>
+          <p>所有书源、爬虫任务的运行输出 · 实时流 · 5 等级</p>
+        </div>
+        <label class="input" style="width: 320px;">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="search" placeholder="搜索关键字、书源 ID、章节名…" />
+        </label>
+      </div>
+
+      <div class="layout">
+        <aside class="filter-pane">
+          <h4>书源</h4>
+          <ul class="src-list">
+            <li><span class="check on"></span><span class="name">全部</span><span class="count">12,847</span></li>
+            <li><span class="check on"></span><span class="name">biququ.com</span><span class="count">1,824</span></li>
+            <li><span class="check on"></span><span class="name">qidian.com</span><span class="count">1,632</span></li>
+            <li><span class="check on"></span><span class="name">shuquge.com</span><span class="count">1,247</span></li>
+            <li><span class="check on"></span><span class="name">69shu.com</span><span class="count">982</span></li>
+            <li><span class="check on"></span><span class="name">xiaoshuo.com</span><span class="count">714</span></li>
+            <li><span class="check"></span><span class="name">yqkvip.com</span><span class="count">512</span></li>
+            <li><span class="check"></span><span class="name">paoshu8.com</span><span class="count">498</span></li>
+            <li><span class="check"></span><span class="name">bqg99.com</span><span class="count">342</span></li>
+            <li><span class="check"></span><span class="name">8shuwu.com</span><span class="count">298</span></li>
+            <li><span class="check"></span><span class="name">其他 5 个</span><span class="count">4,798</span></li>
+          </ul>
+
+          <h4>时间范围</h4>
+          <ul class="src-list">
+            <li><span class="check on"></span><span class="name">最近 5 分钟</span></li>
+            <li><span class="check"></span><span class="name">最近 1 小时</span></li>
+            <li><span class="check"></span><span class="name">最近 24 小时</span></li>
+            <li><span class="check"></span><span class="name">自定义</span></li>
+          </ul>
+        </aside>
+
+        <section class="stream">
+          <div class="stream-bar">
+            <div class="level-tabs" role="tablist">
+              <span class="chip" aria-selected="true" data-lvl="all">全部 <span class="num">12,847</span></span>
+              <span class="chip" aria-selected="false" data-lvl="info"><span class="dot info"></span>INFO <span class="num">9,283</span></span>
+              <span class="chip" aria-selected="false" data-lvl="warn"><span class="dot warn"></span>WARN <span class="num">1,402</span></span>
+              <span class="chip" aria-selected="false" data-lvl="error"><span class="dot error"></span>ERROR <span class="num">187</span></span>
+              <span class="chip" aria-selected="false" data-lvl="debug"><span class="dot debug"></span>DEBUG <span class="num">1,624</span></span>
+              <span class="chip" aria-selected="false" data-lvl="success"><span class="dot success"></span>SUCCESS <span class="num">351</span></span>
+            </div>
+          </div>
+
+          <div class="stream-body" id="stream">
+            <div class="log-line info"><span class="ln">12847</span><span class="ts">15:42:18.241</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[qidian.com]</span>任务启动 · 抓取《剑来》最新章节列表</span></div>
+            <div class="log-line info"><span class="ln">12846</span><span class="ts">15:42:18.198</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[biququ.com]</span>HTTP 200 · 1,247 字节 · 0.42s · 解析规则 #3</span></div>
+            <div class="log-line success"><span class="ln">12845</span><span class="ts">15:42:17.946</span><span class="lvl success">OK</span><span class="msg"><span class="src">[biququ.com]</span>《完美世界》第 1834 章「石昊斩神」入库成功</span></div>
+            <div class="log-line warn"><span class="ln">12844</span><span class="ts">15:42:17.812</span><span class="lvl warn">WARN</span><span class="msg"><span class="src">[69shu.com]</span>触发限流 · 切换代理 #3 · 自动降速至 1 req/3s</span></div>
+            <div class="log-line info"><span class="ln">12843</span><span class="ts">15:42:17.604</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[shuquge.com]</span>开始抓取《凡人修仙传》第 1582 章</span></div>
+            <div class="log-line error"><span class="ln">12842</span><span class="ts">15:42:17.521</span><span class="lvl error">ERR </span><span class="msg"><span class="src">[xiaoshuo.com]</span>HTTP 401 · 鉴权过期 · 已暂停源 src-006</span></div>
+            <div class="log-line debug"><span class="ln">12841</span><span class="ts">15:42:17.488</span><span class="lvl debug">DBG </span><span class="msg"><span class="src">[core]</span>queue.enqueue(task=t-2841, source=src-001, priority=NORMAL)</span></div>
+            <div class="log-line info"><span class="ln">12840</span><span class="ts">15:42:17.402</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[core]</span>scheduler.tick · running=4, queued=23, idle=2</span></div>
+            <div class="log-line info"><span class="ln">12839</span><span class="ts">15:42:17.298</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[paoshu8.com]</span>HTTP 200 · 842 字节 · 0.38s</span></div>
+            <div class="log-line success"><span class="ln">12838</span><span class="ts">15:42:17.156</span><span class="lvl success">OK</span><span class="msg"><span class="src">[paoshu8.com]</span>《遮天》第 1623 章入库成功 · 3,127 字</span></div>
+            <div class="log-line warn"><span class="ln">12837</span><span class="ts">15:42:17.084</span><span class="lvl warn">WARN</span><span class="msg"><span class="src">[yqkvip.com]</span>解析规则 #2 失败 · 已回退至 #1</span></div>
+            <div class="log-line info"><span class="ln">12836</span><span class="ts">15:42:16.945</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[biququ.com]</span>开始抓取《完美世界》最新章节</span></div>
+            <div class="log-line debug"><span class="ln">12835</span><span class="ts">15:42:16.812</span><span class="lvl debug">DBG </span><span class="msg"><span class="src">[proxy]</span>selected proxy-7 · latency 124ms · location sg</span></div>
+            <div class="log-line info"><span class="ln">12834</span><span class="ts">15:42:16.708</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[qidian.com]</span>HTTP 200 · 2,318 字节 · 0.61s</span></div>
+            <div class="log-line error"><span class="ln">12833</span><span class="ts">15:42:16.624</span><span class="lvl error">ERR </span><span class="msg"><span class="src">[bqg99.com]</span>连接超时 30s · 已重试 1/3</span></div>
+            <div class="log-line info"><span class="ln">12832</span><span class="ts">15:42:16.512</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[ddxs.com]</span>《最强狂兵》第 2901 章入库成功</span></div>
+            <div class="log-line info"><span class="ln">12831</span><span class="ts">15:42:16.398</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[core]</span>queue.dequeue(task=t-2839) · 耗时 2.4s · 状态 SUCCESS</span></div>
+            <div class="log-line warn"><span class="ln">12830</span><span class="ts">15:42:16.281</span><span class="lvl warn">WARN</span><span class="msg"><span class="src">[69shu.com]</span>HTTP 429 · 触发限流 · 退避 3s</span></div>
+            <div class="log-line success"><span class="ln">12829</span><span class="ts">15:42:16.142</span><span class="lvl success">OK</span><span class="msg"><span class="src">[shuquge.com]</span>《凡人修仙传》第 1581 章入库成功 · 2,894 字</span></div>
+            <div class="log-line info"><span class="ln">12828</span><span class="ts">15:42:16.024</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[shuquge.com]</span>HTTP 200 · 1,872 字节 · 0.55s</span></div>
+            <div class="log-line debug"><span class="ln">12827</span><span class="ts">15:42:15.918</span><span class="lvl debug">DBG </span><span class="msg"><span class="src">[parser]</span>ruleset shuquge-v2 matched · 18 selectors applied</span></div>
+            <div class="log-line info"><span class="ln">12826</span><span class="ts">15:42:15.802</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[core]</span>scheduler.tick · running=4, queued=24, idle=2</span></div>
+            <div class="log-line info"><span class="ln">12825</span><span class="ts">15:42:15.694</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[biququ.com]</span>开始抓取《遮天》最新章节列表</span></div>
+            <div class="log-line warn"><span class="ln">12824</span><span class="ts">15:42:15.582</span><span class="lvl warn">WARN</span><span class="msg"><span class="src">[yqkvip.com]</span>正文长度 124 &lt; 阈值 800 · 标记为低质量</span></div>
+            <div class="log-line success"><span class="ln">12823</span><span class="ts">15:42:15.461</span><span class="lvl success">OK</span><span class="msg"><span class="src">[paoshu8.com]</span>《遮天》第 1622 章入库成功</span></div>
+            <div class="log-line info"><span class="ln">12822</span><span class="ts">15:42:15.348</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[paoshu8.com]</span>HTTP 200 · 1,103 字节 · 0.31s</span></div>
+            <div class="log-line error"><span class="ln">12821</span><span class="ts">15:42:15.232</span><span class="lvl error">ERR </span><span class="msg"><span class="src">[bqg99.com]</span>DNS 解析失败 · 域名无法解析</span></div>
+            <div class="log-line info"><span class="ln">12820</span><span class="ts">15:42:15.124</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[core]</span>queue.dequeue(task=t-2838) · 耗时 1.8s · 状态 SUCCESS</span></div>
+            <div class="log-line debug"><span class="ln">12819</span><span class="ts">15:42:15.012</span><span class="lvl debug">DBG </span><span class="msg"><span class="src">[cache]</span>hit key=src-001:toc:剑来 · 124 entries</span></div>
+            <div class="log-line info"><span class="ln">12818</span><span class="ts">15:42:14.898</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[8shuwu.com]</span>开始抓取《庆余年》第 728 章</span></div>
+            <div class="log-line warn"><span class="ln">12817</span><span class="ts">15:42:14.781</span><span class="lvl warn">WARN</span><span class="msg"><span class="src">[mantou.com]</span>章节顺序异常 · 跳过 12 章待人工核对</span></div>
+            <div class="log-line info"><span class="ln">12816</span><span class="ts">15:42:14.662</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[qidian.com]</span>《剑来》第 1247 章列表已缓存</span></div>
+            <div class="log-line info"><span class="ln">12815</span><span class="ts">15:42:14.548</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[core]</span>scheduler.tick · running=4, queued=25, idle=2</span></div>
+            <div class="log-line success"><span class="ln">12814</span><span class="ts">15:42:14.421</span><span class="lvl success">OK</span><span class="msg"><span class="src">[qidian.com]</span>《剑来》第 1247 章入库成功 · 3,124 字</span></div>
+            <div class="log-line info"><span class="ln">12813</span><span class="ts">15:42:14.312</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[qidian.com]</span>HTTP 200 · 2,318 字节 · 0.59s</span></div>
+            <div class="log-line debug"><span class="ln">12812</span><span class="ts">15:42:14.198</span><span class="lvl debug">DBG </span><span class="msg"><span class="src">[parser]</span>selectors applied: title, author, intro, chapter[]</span></div>
+            <div class="log-line info"><span class="ln">12811</span><span class="ts">15:42:14.082</span><span class="lvl info">INFO</span><span class="msg"><span class="src">[qidian.com]</span>开始抓取《剑来》第 1247 章</span></div>
+          </div>
+
+          <div class="stream-foot">
+            <span class="live" id="liveStatus"><span class="blink"></span>实时 · 38 行/秒</span>
+            <span>显示 12811–12847 · 共 12,847 行</span>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Theme toggle
+  (function(){
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-theme') || 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('legado-theme', next); } catch(e) {}
+      });
+    }
+  })();
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast success';
+    t.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>' + msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+  }
+
+  const lines = document.querySelectorAll('.log-line');
+
+  // Level filter
+  const lvlChips = document.querySelectorAll('.level-tabs .chip');
+  let activeLevel = 'all';
+  lvlChips.forEach(c => c.addEventListener('click', () => {
+    lvlChips.forEach(x => x.setAttribute('aria-selected', 'false'));
+    c.setAttribute('aria-selected', 'true');
+    activeLevel = c.dataset.lvl;
+    applyAllFilters();
+  }));
+
+  // Search box
+  const searchInput = document.querySelector('.page-head .input input[type="search"]');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => { applyAllFilters(); });
+  }
+
+  // Source filter (checkboxes)
+  const srcItems = document.querySelectorAll('.filter-pane .src-list:first-of-type li');
+  let activeSources = new Set();
+  // Initialize: all "on" sources
+  srcItems.forEach(li => {
+    const check = li.querySelector('.check');
+    const name = li.querySelector('.name')?.textContent?.trim();
+    if (check.classList.contains('on') && name !== '全部') {
+      activeSources.add(name);
+    }
+  });
+
+  srcItems.forEach(li => {
+    li.addEventListener('click', () => {
+      const c = li.querySelector('.check');
+      const name = li.querySelector('.name')?.textContent?.trim();
+      if (name === '全部') {
+        const allOn = Array.from(srcItems).every(l => l.querySelector('.check').classList.contains('on'));
+        srcItems.forEach(l => {
+          if (allOn) { if (l.querySelector('.name')?.textContent?.trim() !== '全部') l.querySelector('.check').classList.remove('on'); }
+          else { l.querySelector('.check').classList.add('on'); }
+        });
+        activeSources.clear();
+        if (!allOn) {
+          srcItems.forEach(l => {
+            const n = l.querySelector('.name')?.textContent?.trim();
+            if (n && n !== '全部') activeSources.add(n);
+          });
+        }
+      } else {
+        c.classList.toggle('on');
+        if (c.classList.contains('on')) activeSources.add(name);
+        else activeSources.delete(name);
+      }
+      applyAllFilters();
+    });
+  });
+
+  // Time range filter
+  const timeItems = document.querySelectorAll('.filter-pane .src-list:last-of-type li');
+  timeItems.forEach(li => {
+    li.addEventListener('click', () => {
+      timeItems.forEach(l => l.querySelector('.check').classList.remove('on'));
+      li.querySelector('.check').classList.add('on');
+      applyAllFilters();
+    });
+  });
+
+  // Combined filter function
+  function applyAllFilters() {
+    const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+    const activeTimeBtn = document.querySelector('.filter-pane .src-list:last-of-type .check.on');
+    const timeRange = activeTimeBtn ? activeTimeBtn.closest('li')?.querySelector('.name')?.textContent?.trim() : '最近 5 分钟';
+
+    let visibleCount = 0;
+    lines.forEach(l => {
+      // Level filter
+      const isOk = l.classList.contains('success');
+      const cls = isOk ? 'success' : (l.classList.contains('warn') ? 'warn' : (l.classList.contains('error') ? 'error' : (l.classList.contains('debug') ? 'debug' : 'info')));
+      const levelOk = activeLevel === 'all' || activeLevel === cls;
+
+      // Source filter
+      const srcSpan = l.querySelector('.src');
+      const srcText = srcSpan ? srcSpan.textContent.replace(/[\[\]]/g, '').trim() : '';
+      const sourceOk = activeSources.size === 0 || activeSources.has(srcText);
+
+      // Search filter
+      const textContent = l.textContent.toLowerCase();
+      const searchOk = !searchQuery || textContent.includes(searchQuery);
+
+      // Time filter (simplified - just check timestamp text)
+      const tsText = l.querySelector('.ts')?.textContent || '';
+      let timeOk = true;
+      if (timeRange === '最近 5 分钟') { timeOk = true; } // show all for "recent"
+      else if (timeRange === '最近 1 小时') { timeOk = true; }
+      else if (timeRange === '最近 24 小时') { timeOk = true; }
+
+      const show = levelOk && sourceOk && searchOk && timeOk;
+      l.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+
+    // Update footer count
+    const footSpan = document.querySelector('.stream-foot span:last-child');
+    if (footSpan) {
+      const total = lines.length;
+      footSpan.textContent = visibleCount === total ? '显示 1–' + total + ' · 共 ' + total + ' 行' : '显示 ' + visibleCount + ' / ' + total + ' 行';
+    }
+  }
+
+  // Export button
+  document.querySelectorAll('.topbar .btn').forEach(btn => {
+    if (btn.textContent.includes('导出')) {
+      btn.addEventListener('click', () => {
+        const visibleLines = Array.from(lines).filter(l => l.style.display !== 'none');
+        const text = visibleLines.map(l => l.textContent.trim()).join('\n');
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'legado-logs-' + new Date().toISOString().slice(0, 10) + '.txt';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast('已导出 ' + visibleLines.length + ' 行日志');
+      });
+    }
+    if (btn.textContent.includes('保留 7 天')) {
+      btn.addEventListener('click', () => {
+        showToast('日志保留策略已设置为 7 天');
+      });
+    }
+  });
+
+  // Live toggle
+  const liveBtn = document.getElementById('liveBtn');
+  const liveStatus = document.getElementById('liveStatus');
+  liveBtn.addEventListener('click', () => {
+    const on = !liveBtn.classList.contains('is-active');
+    liveBtn.classList.toggle('is-active', on);
+    liveStatus.classList.toggle('off', !on);
+    liveStatus.lastChild.textContent = on ? ' 实时 · 38 行/秒' : ' 已暂停';
+  });
+</script>
+</body>
+</html>

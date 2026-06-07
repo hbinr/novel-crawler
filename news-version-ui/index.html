@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Legado 控制台 · 屏幕索引</title>
+<script>
+  // 反 FOUC：同步读取主题，避免亮色页面闪烁
+  (function(){
+    try {
+      var t = localStorage.getItem('legado-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  })();
+</script>
+<style>
+  /* ═══ Tokens — Airtable (light) + dark override ═══════════════════ */
+  :root {
+    /* Surface */
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #fafbfc;     /* sidebar, subhead, table thead */
+    --surface-3: #f6f7f9;     /* hover-bg, ctrl-input hover */
+    --surface-4: #f1f3f6;     /* pill-off, chip track, bar track */
+    --fg: #181d26;
+    --fg-2: #333333;
+    --muted: rgba(4, 14, 32, 0.69);
+    --meta: var(--muted);
+    --border: #e0e2e6;
+    --border-soft: #eef0f3;
+    --track: #d4d6dc;          /* switch off, bar track variant */
+
+    /* Accent */
+    --accent: #1b61c9;
+    --accent-soft: rgba(27, 97, 201, 0.08);
+    --accent-soft-2: rgba(27, 97, 201, 0.10);
+    --accent-soft-3: rgba(27, 97, 201, 0.12);
+    --accent-on: #ffffff;
+    --accent-hover: #254fad;
+    --accent-active: color-mix(in oklab, var(--accent), black 14%);
+
+    /* Semantic */
+    --success: #006400;
+    --success-soft: rgba(0, 100, 0, 0.08);
+    --warn: #eab308;
+    --warn-soft: rgba(234, 179, 8, 0.12);
+    --warn-ink: #92670a;
+    --danger: #dc2626;
+    --danger-soft: rgba(220, 38, 38, 0.08);
+
+    /* Type */
+    --font-display: "Haas Groot Disp", Haas, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-body: Haas, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+    --text-xs: 12px; --text-sm: 14px; --text-base: 16px; --text-lg: 20px;
+    --text-xl: 24px; --text-2xl: 32px; --text-3xl: 40px; --text-4xl: 48px;
+    --leading-body: 1.35;
+    --leading-tight: 1.2;
+
+    /* Spacing */
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+    --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
+
+    /* Radius */
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-pill: 9999px;
+
+    /* Elevation (signature Airtable blue-tinted stack) */
+    --elev-raised:
+      0 0 1px rgba(0, 0, 0, 0.32),
+      0 0 2px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(45, 127, 249, 0.28),
+      inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+    --elev-hover:
+      0 0 1px rgba(0, 0, 0, 0.32),
+      0 0 4px rgba(0, 0, 0, 0.08),
+      0 6px 16px rgba(45, 127, 249, 0.18),
+      inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+
+    /* Focus + motion */
+    --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 70%);
+    --motion-fast: 150ms;
+    --motion-base: 200ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Chart palette (drives SVG fills) */
+    --chart-1: #1b61c9;
+    --chart-2: rgba(27, 97, 201, 0.18);
+    --chart-err: #dc2626;
+    --chart-grid: #eef0f3;
+    --chart-axis: rgba(4, 14, 32, 0.55);
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --surface-3: #22272e;
+    --surface-4: #2d333b;
+    --fg: #e6edf3;
+    --fg-2: #c9d1d9;
+    --muted: rgba(230, 237, 243, 0.55);
+    --meta: var(--muted);
+    --border: #30363d;
+    --border-soft: #21262d;
+    --track: #484f58;
+
+    --accent: #4493f8;
+    --accent-soft: rgba(68, 147, 248, 0.16);
+    --accent-soft-2: rgba(68, 147, 248, 0.20);
+    --accent-soft-3: rgba(68, 147, 248, 0.24);
+    --accent-on: #0d1117;
+    --accent-hover: #58a6ff;
+    --accent-active: color-mix(in oklab, var(--accent), white 10%);
+
+    --success: #3fb950;
+    --success-soft: rgba(63, 185, 80, 0.15);
+    --warn: #d29922;
+    --warn-soft: rgba(210, 153, 34, 0.18);
+    --warn-ink: #e3b341;
+    --danger: #f85149;
+    --danger-soft: rgba(248, 81, 73, 0.15);
+
+    --elev-raised:
+      0 0 1px rgba(0, 0, 0, 0.6),
+      0 0 2px rgba(0, 0, 0, 0.4),
+      0 1px 3px rgba(68, 147, 248, 0.28),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+    --elev-hover:
+      0 0 1px rgba(0, 0, 0, 0.6),
+      0 0 4px rgba(0, 0, 0, 0.4),
+      0 6px 16px rgba(68, 147, 248, 0.22),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+
+    --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 70%);
+
+    --chart-1: #4493f8;
+    --chart-2: rgba(68, 147, 248, 0.28);
+    --chart-err: #f85149;
+    --chart-grid: #21262d;
+    --chart-axis: rgba(230, 237, 243, 0.45);
+
+    color-scheme: dark;
+  }
+
+  /* ═══ Base ═══════════════════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--fg);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: 0.08px;
+    transition: background var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hover); }
+  a:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
+
+  /* ═══ Layout chrome ══════════════════════════════════════════════ */
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar {
+    border-right: 1px solid var(--border);
+    background: var(--surface-2);
+    padding: var(--space-6) var(--space-4);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display); font-size: 18px; font-weight: 500;
+    color: var(--fg); margin-bottom: var(--space-8);
+  }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--accent);
+    display: grid; place-items: center; color: var(--accent-on);
+    font-family: var(--font-display); font-weight: 600; font-size: 14px;
+  }
+  .nav-label {
+    font-family: var(--font-mono);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--muted); padding: 0 var(--space-3);
+    margin: var(--space-5) 0 var(--space-2);
+  }
+  .nav { list-style: none; padding: 0; margin: 0; }
+  .nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 10px;
+    color: var(--fg-2); font-size: 14px;
+    transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
+  }
+  .nav a:hover { background: var(--surface-3); color: var(--fg); }
+  .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+  .nav svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; flex: 0 0 18px; }
+  .nav .badge {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 11px;
+    background: var(--surface-4); color: var(--fg-2);
+    padding: 1px 7px; border-radius: var(--radius-pill);
+  }
+  .nav a[aria-current="page"] .badge { background: var(--accent-soft-3); color: var(--accent); }
+  .nav-foot { margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid var(--border-soft); }
+  .nav-foot small { display: block; color: var(--muted); font-size: 12px; padding: 4px 12px; }
+  .nav-foot small + small { margin-top: 2px; }
+
+  /* ═══ Topbar ═════════════════════════════════════════════════════ */
+  .topbar {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-4) var(--space-6);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 5;
+    transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+  }
+  .topbar h1 { margin: 0; font-size: 18px; font-weight: 500; font-family: var(--font-display); }
+  .topbar .crumb { color: var(--muted); font-size: 13px; }
+  .topbar .spacer { flex: 1; }
+  .topbar .user {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 10px 4px 4px; border: 1px solid var(--border);
+    border-radius: var(--radius-pill); background: var(--surface);
+    transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+  }
+  .topbar .user .avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    color: var(--accent-on); display: grid; place-items: center;
+    font-size: 12px; font-weight: 600;
+  }
+  .topbar .user span { font-size: 13px; }
+
+  /* Icon button (theme toggle etc) */
+  .icon-btn {
+    display: inline-grid; place-items: center;
+    width: 36px; height: 36px; border-radius: var(--radius-sm);
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--fg-2); cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard);
+  }
+  .icon-btn:hover { background: var(--surface-3); color: var(--fg); }
+  .icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .icon-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .icon-btn .sun, .icon-btn .moon { display: none; }
+  [data-theme="light"] .icon-btn .sun, :root:not([data-theme]) .icon-btn .sun { display: block; }
+  [data-theme="dark"] .icon-btn .moon { display: block; }
+
+  /* ═══ Buttons ════════════════════════════════════════════════════ */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 36px; padding: 0 16px; border-radius: var(--radius-sm);
+    font: 500 14px/1 var(--font-body); letter-spacing: 0.08px;
+    border: 1px solid transparent; cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard);
+  }
+  .btn-primary { background: var(--accent); color: var(--accent-on); }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:active { background: var(--accent-active); }
+  .btn-secondary { background: var(--surface); color: var(--fg); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--surface-3); }
+  .btn-ghost { background: transparent; color: var(--fg-2); }
+  .btn-ghost:hover { background: var(--surface-4); color: var(--fg); }
+  .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .btn.is-active { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+  .btn.is-active:hover { background: var(--accent-hover); }
+
+  /* ═══ Main / content ══════════════════════════════════════════════ */
+  .main { min-width: 0; }
+  /* No max-width here — content fills grid cell so right side never whites-out. */
+  /* Inner sections that need a cap declare their own. */
+  .content { padding: var(--space-8) var(--space-6) var(--space-12); }
+  .content > * + * { margin-top: var(--space-6); }
+
+  /* ═══ Launcher (index-specific) ══════════════════════════════════ */
+  .launcher-head { display: flex; align-items: end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+  .launcher-head h2 {
+    font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 500;
+    margin: 0 0 6px; letter-spacing: -0.01em;
+  }
+  .launcher-head p { margin: 0; color: var(--muted); font-size: 15px; }
+  .launcher-meta { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .launcher-meta span {
+    padding: 5px 12px; border: 1px solid var(--border); border-radius: var(--radius-pill);
+    background: var(--surface); font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+  .card {
+    display: flex; flex-direction: column;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: var(--space-5);
+    box-shadow: var(--elev-raised);
+    transition: transform var(--motion-base) var(--ease-standard), box-shadow var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+    text-decoration: none; color: inherit;
+    min-height: 200px;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--elev-hover); color: inherit; }
+  .card-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center; margin-bottom: var(--space-4);
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .card-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; font-family: var(--font-display); }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; flex: 1; }
+  .card-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: var(--space-5); padding-top: var(--space-3);
+    border-top: 1px solid var(--border-soft);
+    font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+  }
+  .card-foot .arrow { color: var(--accent); display: inline-flex; align-items: center; gap: 4px; }
+  .card-foot .arrow svg { width: 12px; height: 12px; }
+
+  .spec { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+  .spec-item {
+    padding: var(--space-4); border: 1px solid var(--border-soft); border-radius: var(--radius-md);
+    background: var(--surface-2);
+    transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+  }
+  .spec-item dt { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 4px; }
+  .spec-item dd { margin: 0; font-size: 14px; color: var(--fg); }
+  .spec-item dd b { font-family: var(--font-mono); font-weight: 500; color: var(--accent); }
+
+  /* ═══ Responsive ═════════════════════════════════════════════════ */
+  @media (max-width: 1280px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .spec { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; padding: var(--space-4); border-right: 0; border-bottom: 1px solid var(--border); }
+    .sidebar .nav-label, .sidebar .nav-foot, .nav .badge { display: none; }
+    .nav { display: flex; flex-wrap: wrap; gap: 4px; }
+    .nav a { padding: 6px 10px; font-size: 12px; }
+    .content { padding: var(--space-5) var(--space-4) var(--space-8); }
+    .topbar { padding: var(--space-3) var(--space-4); }
+    .topbar h1 { font-size: 16px; }
+    .topbar .crumb { display: none; }
+    .launcher-head { flex-direction: column; align-items: flex-start; }
+    .launcher-head h2 { font-size: 28px; }
+    .grid { grid-template-columns: 1fr; }
+    .spec { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar (shared chrome) -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">L</span>
+      <span>Legado</span>
+    </div>
+    <div class="nav-label">控制台</div>
+    <ul class="nav" role="navigation">
+      <li><a href="index.html" aria-current="page">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        屏幕索引
+      </a></li>
+      <li><a href="dashboard.html">
+        <svg viewBox="0 0 24 24"><path d="M3 12l3-7h4l3 7 3-7h4l3 7"/><path d="M3 19h18"/></svg>
+        总览仪表盘
+      </a></li>
+      <li><a href="sources.html">
+        <svg viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 013 3v13H7a3 3 0 01-3-3V4z"/><path d="M4 17h15"/></svg>
+        书源管理<span class="badge">15</span>
+      </a></li>
+      <li><a href="tasks.html">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        任务列表<span class="badge">23</span>
+      </a></li>
+      <li><a href="logs.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l2 2 4-4M7 15h10"/></svg>
+        运行日志
+      </a></li>
+    </ul>
+    <div class="nav-label">内容</div>
+    <ul class="nav">
+      <li><a href="preview.html">
+        <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 9h18M7 13h6M7 16h10"/></svg>
+        章节预览
+      </a></li>
+      <li><a href="settings.html">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+        系统设置
+      </a></li>
+    </ul>
+    <div class="nav-foot">
+      <small>v2.0.4 · build a7c2e1f</small>
+      <small>本地服务 · 在线</small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>屏幕索引</h1>
+      <span class="crumb">/ 6 个屏幕 · 响应式</span>
+      <div class="spacer"></div>
+      <button class="icon-btn" type="button" id="themeToggle" aria-label="切换主题" title="切换主题">
+        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+      <button class="btn btn-secondary" type="button" onclick="window.print()">
+        <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        打印
+      </button>
+      <div class="user" title="管理员">
+        <span class="avatar">R</span>
+        <span>rui@legado.local</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="launcher-head">
+        <div>
+          <h2>小说爬虫管理控制台</h2>
+          <p>基于 Airtable 设计系统重做 · 6 个屏幕 · 桌面 / 平板 / 手机响应式</p>
+        </div>
+        <div class="launcher-meta">
+          <span>v2.0 重设计</span>
+          <span>6 屏幕</span>
+          <span>Airtable</span>
+          <span>支持 Dark</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <a class="card" href="dashboard.html">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 12l3-7h4l3 7 3-7h4l3 7"/><path d="M3 19h18"/></svg>
+          </div>
+          <h3>总览仪表盘</h3>
+          <p>活跃书源、今日抓取、成功率、队列深度。7 日抓取曲线、错误趋势、Top 5 书源健康榜、实时任务流。</p>
+          <div class="card-foot">
+            <span>dashboard.html</span>
+            <span class="arrow">打开 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <a class="card" href="sources.html">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 013 3v13H7a3 3 0 01-3-3V4z"/><path d="M4 17h15"/></svg>
+          </div>
+          <h3>书源管理</h3>
+          <p>保留 ID / 名称 / 路径 / 时间 4 列；新增健康度、成功率、最近抓取、状态。搜索、筛选、批量启用 / 禁用、测试抓取。</p>
+          <div class="card-foot">
+            <span>sources.html · 15 书源</span>
+            <span class="arrow">打开 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <a class="card" href="tasks.html">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          </div>
+          <h3>任务列表</h3>
+          <p>正在抓取 / 排队 / 已完成 / 失败 4 个分页；任务卡片含进度条、状态、来源、预计完成时间，可运行 / 重试 / 取消。</p>
+          <div class="card-foot">
+            <span>tasks.html · 23 任务</span>
+            <span class="arrow">打开 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <a class="card" href="logs.html">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l2 2 4-4M7 15h10"/></svg>
+          </div>
+          <h3>运行日志</h3>
+          <p>实时日志流，等级 INFO / WARN / ERROR / DEBUG / SUCCESS 颜色编码；按书源、时间范围筛选，搜索关键字，行号 + mono。</p>
+          <div class="card-foot">
+            <span>logs.html · 实时</span>
+            <span class="arrow">打开 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <a class="card" href="preview.html">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 9h18M7 13h6M7 16h10"/></svg>
+          </div>
+          <h3>章节预览</h3>
+          <p>左栏章节目录 + 中部正文阅读区 + 右栏来源元数据。正文为阅读优化的衬线字体，宽松行高、段间距。</p>
+          <div class="card-foot">
+            <span>preview.html · 阅读器</span>
+            <span class="arrow">打开 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <a class="card" href="settings.html">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+          </div>
+          <h3>系统设置</h3>
+          <p>书源默认参数、爬虫调度、网络代理、存储路径、账户 5 个分区。表单 / 开关 / 分段控件，底部保存条。</p>
+          <div class="card-foot">
+            <span>settings.html · 5 分区</span>
+            <span class="arrow">打开 <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+      </div>
+
+      <dl class="spec">
+        <div class="spec-item">
+          <dt>设计系统</dt>
+          <dd><b>Airtable</b> · 深海军 #181d26 · 蓝 #1b61c9</dd>
+        </div>
+        <div class="spec-item">
+          <dt>断点</dt>
+          <dd>360 · 768 · 1024 · 1280 · 1920</dd>
+        </div>
+        <div class="spec-item">
+          <dt>字体</dt>
+          <dd>Haas / Haas Groot Disp · 系统回退</dd>
+        </div>
+        <div class="spec-item">
+          <dt>主题</dt>
+          <dd>Light / Dark · localStorage 持久化</dd>
+        </div>
+      </dl>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Theme toggle
+  (function(){
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-theme') || 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('legado-theme', next); } catch(e) {}
+      });
+    }
+  })();
+</script>
+</body>
+</html>

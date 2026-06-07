@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>任务列表 · Legado</title>
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('legado-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  })();
+</script>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #ffffff; --surface-2: #fafbfc;
+    --surface-3: #f6f7f9; --surface-4: #f1f3f6;
+    --fg: #181d26; --fg-2: #333333; --muted: rgba(4, 14, 32, 0.69); --meta: var(--muted);
+    --border: #e0e2e6; --border-soft: #eef0f3; --track: #d4d6dc;
+    --accent: #1b61c9;
+    --accent-soft: rgba(27, 97, 201, 0.08);
+    --accent-soft-2: rgba(27, 97, 201, 0.10);
+    --accent-soft-3: rgba(27, 97, 201, 0.12);
+    --accent-on: #ffffff; --accent-hover: #254fad;
+    --accent-active: color-mix(in oklab, var(--accent), black 14%);
+    --success: #006400; --success-soft: rgba(0, 100, 0, 0.08); --success-tint: rgba(0, 100, 0, 0.10);
+    --warn: #eab308; --warn-soft: rgba(234, 179, 8, 0.12); --warn-ink: #92670a;
+    --danger: #dc2626; --danger-soft: rgba(220, 38, 38, 0.08); --danger-tint: rgba(220, 38, 38, 0.10);
+    --font-display: "Haas Groot Disp", Haas, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-body: Haas, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+    --text-xs: 12px; --text-sm: 14px; --text-base: 16px; --text-lg: 20px;
+    --text-xl: 24px; --text-2xl: 32px; --text-3xl: 40px;
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+    --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
+    --radius-sm: 12px; --radius-md: 16px; --radius-pill: 9999px;
+    --elev-raised:
+      0 0 1px rgba(0, 0, 0, 0.32), 0 0 2px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(45, 127, 249, 0.28), inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+    --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 70%);
+    --motion-fast: 150ms; --motion-base: 200ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    --bg: #0d1117; --surface: #161b22; --surface-2: #1c2128;
+    --surface-3: #22272e; --surface-4: #2d333b;
+    --fg: #e6edf3; --fg-2: #c9d1d9; --muted: rgba(230, 237, 243, 0.55); --meta: var(--muted);
+    --border: #30363d; --border-soft: #21262d; --track: #484f58;
+    --accent: #4493f8;
+    --accent-soft: rgba(68, 147, 248, 0.16);
+    --accent-soft-2: rgba(68, 147, 248, 0.20);
+    --accent-soft-3: rgba(68, 147, 248, 0.24);
+    --accent-on: #0d1117; --accent-hover: #58a6ff;
+    --accent-active: color-mix(in oklab, var(--accent), white 10%);
+    --success: #3fb950; --success-soft: rgba(63, 185, 80, 0.15); --success-tint: rgba(63, 185, 80, 0.18);
+    --warn: #d29922; --warn-soft: rgba(210, 153, 34, 0.18); --warn-ink: #e3b341;
+    --danger: #f85149; --danger-soft: rgba(248, 81, 73, 0.15); --danger-tint: rgba(248, 81, 73, 0.18);
+    --elev-raised:
+      0 0 1px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.4),
+      0 1px 3px rgba(68, 147, 248, 0.28), inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body); color: var(--fg); background: var(--bg); -webkit-font-smoothing: antialiased; letter-spacing: 0.08px; transition: background var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hover); }
+  a:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
+
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar { border-right: 1px solid var(--border); background: var(--surface-2); padding: var(--space-6) var(--space-4); position: sticky; top: 0; height: 100vh; overflow-y: auto; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 18px; font-weight: 500; color: var(--fg); margin-bottom: var(--space-8); }
+  .brand-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; color: var(--accent-on); font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+  .nav-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); padding: 0 var(--space-3); margin: var(--space-5) 0 var(--space-2); }
+  .nav { list-style: none; padding: 0; margin: 0; }
+  .nav a { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; color: var(--fg-2); font-size: 14px; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+  .nav a:hover { background: var(--surface-3); color: var(--fg); }
+  .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+  .nav svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; flex: 0 0 18px; }
+  .nav .badge { margin-left: auto; font-family: var(--font-mono); font-size: 11px; background: var(--surface-4); color: var(--fg-2); padding: 1px 7px; border-radius: var(--radius-pill); }
+  .nav a[aria-current="page"] .badge { background: var(--accent-soft-3); color: var(--accent); }
+  .nav-foot { margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid var(--border-soft); }
+  .nav-foot small { display: block; color: var(--muted); font-size: 12px; padding: 4px 12px; }
+  .nav-foot small + small { margin-top: 2px; }
+
+  .topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 5; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .topbar h1 { margin: 0; font-size: 18px; font-weight: 500; font-family: var(--font-display); }
+  .topbar .crumb { color: var(--muted); font-size: 13px; }
+  .topbar .spacer { flex: 1; }
+  .topbar .user { display: flex; align-items: center; gap: 10px; padding: 4px 10px 4px 4px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .topbar .user .avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); color: var(--accent-on); display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+  .topbar .user span { font-size: 13px; }
+
+  .icon-btn { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); color: var(--fg-2); cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .icon-btn:hover { background: var(--surface-3); color: var(--fg); }
+  .icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .icon-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .icon-btn .sun, .icon-btn .moon { display: none; }
+  [data-theme="light"] .icon-btn .sun, :root:not([data-theme]) .icon-btn .sun { display: block; }
+  [data-theme="dark"] .icon-btn .moon { display: block; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border-radius: var(--radius-sm); font: 500 14px/1 var(--font-body); letter-spacing: 0.08px; border: 1px solid transparent; cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .btn-primary { background: var(--accent); color: var(--accent-on); }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:active { background: var(--accent-active); }
+  .btn-secondary { background: var(--surface); color: var(--fg); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--surface-3); }
+  .btn-ghost { background: transparent; color: var(--fg-2); }
+  .btn-ghost:hover { background: var(--surface-4); color: var(--fg); }
+  .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  .main { min-width: 0; }
+  .content { padding: var(--space-8) var(--space-6) var(--space-12); }
+  .content > * + * { margin-top: var(--space-5); }
+
+  .page-head { display: flex; align-items: end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+  .page-head h2 { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 500; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .page-head p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+  .stat-mini { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); box-shadow: var(--elev-raised); display: flex; align-items: center; gap: var(--space-3); transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .stat-mini .icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: 0 0 36px; }
+  .stat-mini .icon.running { background: var(--accent-soft-2); color: var(--accent); }
+  .stat-mini .icon.queued { background: var(--surface-4); color: var(--fg-2); }
+  .stat-mini .icon.done { background: var(--success-tint); color: var(--success); }
+  .stat-mini .icon.failed { background: var(--danger-tint); color: var(--danger); }
+  .stat-mini .icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .stat-mini .num { font-family: var(--font-display); font-size: 24px; font-weight: 500; line-height: 1; }
+  .stat-mini .label { font-size: 12px; color: var(--muted); }
+
+  .filters { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--radius-pill); background: var(--surface); border: 1px solid var(--border); color: var(--fg-2); font-size: 13px; cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .chip:hover { background: var(--surface-3); color: var(--fg); }
+  .chip[aria-selected="true"] { background: var(--fg); color: var(--surface); border-color: var(--fg); }
+  .chip .num { font-family: var(--font-mono); font-size: 11px; opacity: 0.7; }
+  .filters .spacer { flex: 1; }
+
+  /* Task list */
+  .task-list { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .task {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 200px 100px 110px 120px;
+    align-items: center; gap: var(--space-4);
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 12px var(--space-4); box-shadow: var(--elev-raised);
+    min-width: 0;
+    transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+  }
+  .task:hover { transform: translateY(-1px); }
+
+  .task .state { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; flex: 0 0 32px; }
+  .task .state svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .task .state.running { background: var(--accent-soft-2); color: var(--accent); }
+  .task .state.running svg { animation: spin 1.4s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .task .state.queued { background: var(--surface-4); color: var(--muted); }
+  .task .state.done { background: var(--success-tint); color: var(--success); }
+  .task .state.failed { background: var(--danger-tint); color: var(--danger); }
+
+  .task .info { min-width: 0; }
+  .task .info .title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .task .info .meta { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .task .info .meta b { color: var(--fg-2); font-weight: 500; }
+
+  .task .progress { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .task .progress .bar { height: 6px; background: var(--surface-4); border-radius: 3px; overflow: hidden; }
+  .task .progress .bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width 600ms var(--ease-standard); }
+  .task .progress .bar.warn span { background: var(--warn); }
+  .task .progress .bar.done span { background: var(--success); }
+  .task .progress .bar.failed span { background: var(--danger); }
+  .task .progress .lbl { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+  .task .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 500; }
+  .task .pill.running { background: var(--accent-soft-2); color: var(--accent); }
+  .task .pill.queued { background: var(--surface-4); color: var(--muted); }
+  .task .pill.done { background: var(--success-tint); color: var(--success); }
+  .task .pill.failed { background: var(--danger-tint); color: var(--danger); }
+  .task .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .task .time { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+  .task .time strong { display: block; color: var(--fg-2); font-weight: 500; font-size: 12px; }
+
+  .task .actions { display: flex; gap: 4px; justify-content: flex-end; }
+  .task .actions button { background: transparent; border: 1px solid transparent; padding: 4px 8px; border-radius: 6px; color: var(--muted); cursor: pointer; font-size: 12px; font-family: var(--font-body); transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+  .task .actions button:hover { background: var(--surface-4); color: var(--fg); }
+  .task .actions button.danger:hover { color: var(--danger); background: var(--danger-soft); }
+  .task .actions svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+  /* Sort header */
+  .list-head { display: grid; grid-template-columns: 36px minmax(0, 1fr) 200px 100px 110px 120px; gap: var(--space-4); padding: 8px 16px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-mono); }
+  .list-head span:not(:first-child) { text-align: left; }
+  .list-head span:last-child { text-align: right; }
+
+  @media (max-width: 1280px) {
+    .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .task { grid-template-columns: 32px minmax(0, 1fr) 100px; row-gap: 8px; }
+    .task .progress, .task .time { grid-column: 2; }
+    .task .actions { grid-column: 3; }
+    .task .pill { display: none; }
+    .list-head span:nth-child(4) { display: none; }
+    .list-head { grid-template-columns: 36px minmax(0, 1fr) 200px 110px 120px; }
+  }
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; padding: var(--space-4); border-right: 0; border-bottom: 1px solid var(--border); }
+    .sidebar .nav-label, .sidebar .nav-foot, .nav .badge { display: none; }
+    .nav { display: flex; flex-wrap: wrap; gap: 4px; }
+    .nav a { padding: 6px 10px; font-size: 12px; }
+    .content { padding: var(--space-5) var(--space-4) var(--space-8); }
+    .topbar { padding: var(--space-3) var(--space-4); }
+    .topbar h1 { font-size: 16px; }
+    .topbar .crumb { display: none; }
+    .page-head h2 { font-size: 24px; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .task { grid-template-columns: 28px 1fr; padding: 12px; }
+    .task .progress, .task .time, .task .actions { grid-column: 2; }
+    .list-head { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: 0 24px 48px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.08); width: 480px; max-width: 92vw; max-height: 80vh; display: flex; flex-direction: column; animation: modalIn var(--motion-base) var(--ease-standard); }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(0.97); } to { opacity: 1; transform: none; } }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-5) var(--space-5) 0; }
+  .modal-head h3 { margin: 0; font-size: 18px; font-weight: 500; font-family: var(--font-display); }
+  .modal-close { background: transparent; border: 0; color: var(--muted); cursor: pointer; padding: 4px; border-radius: 8px; transition: background var(--motion-fast); }
+  .modal-close:hover { background: var(--surface-4); color: var(--fg); }
+  .modal-close svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .modal-body { padding: var(--space-5); overflow-y: auto; flex: 1; }
+  .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-top: 1px solid var(--border-soft); }
+  .toast { position: fixed; bottom: var(--space-6); right: var(--space-6); z-index: 200; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--elev-hover); padding: 12px 20px; font-size: 14px; color: var(--fg); display: flex; align-items: center; gap: 10px; animation: toastIn var(--motion-base) var(--ease-standard); }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast svg { width: 18px; height: 18px; stroke: var(--success); fill: none; stroke-width: 1.8; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .form-field { display: grid; grid-template-columns: 80px 1fr; gap: var(--space-3); align-items: start; margin-bottom: var(--space-4); }
+  .form-field label { font-size: 13px; font-weight: 500; padding-top: 8px; }
+  .form-field .input { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; color: var(--fg); width: 100%; }
+  .form-field .input input { border: 0; outline: 0; flex: 1; background: transparent; font: inherit; color: inherit; }
+  .form-field .input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 70%); }
+  .form-field .ctrl-seg { display: inline-flex; background: var(--surface-4); border-radius: 8px; padding: 3px; gap: 2px; }
+  .form-field .ctrl-seg button { background: transparent; border: 0; padding: 5px 12px; border-radius: 6px; font-size: 12px; color: var(--fg-2); cursor: pointer; font-family: var(--font-body); transition: background var(--motion-fast); }
+  .form-field .ctrl-seg button[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">L</span><span>Legado</span></div>
+    <div class="nav-label">控制台</div>
+    <ul class="nav" role="navigation">
+      <li><a href="index.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>屏幕索引</a></li>
+      <li><a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M3 12l3-7h4l3 7 3-7h4l3 7"/><path d="M3 19h18"/></svg>总览仪表盘</a></li>
+      <li><a href="sources.html"><svg viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 013 3v13H7a3 3 0 01-3-3V4z"/><path d="M4 17h15"/></svg>书源管理<span class="badge">15</span></a></li>
+      <li><a href="tasks.html" aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>任务列表<span class="badge">23</span></a></li>
+      <li><a href="logs.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l2 2 4-4M7 15h10"/></svg>运行日志</a></li>
+    </ul>
+    <div class="nav-label">内容</div>
+    <ul class="nav">
+      <li><a href="preview.html"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 9h18M7 13h6M7 16h10"/></svg>章节预览</a></li>
+      <li><a href="settings.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>系统设置</a></li>
+    </ul>
+    <div class="nav-foot"><small>v2.0.4 · build a7c2e1f</small><small>本地服务 · 在线</small></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>任务列表</h1>
+      <span class="crumb">/ 4 运行中 · 12 排队 · 6 已完成 · 1 失败</span>
+      <div class="spacer"></div>
+      <button class="icon-btn" type="button" id="themeToggle" aria-label="切换主题" title="切换主题">
+        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+      <button class="btn btn-ghost" type="button" id="clearDoneBtn"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4M16 6V4M3 10h18"/></svg>清空已完成</button>
+      <button class="btn btn-primary" type="button" id="newTaskBtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新建任务</button>
+      <div class="user"><span class="avatar">R</span><span>rui@legado.local</span></div>
+    </div>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h2>任务</h2>
+          <p>23 个抓取 / 校验 / 解析任务 · 4 个并发执行</p>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-mini">
+          <div class="icon running"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg></div>
+          <div><div class="num">4</div><div class="label">运行中</div></div>
+        </div>
+        <div class="stat-mini">
+          <div class="icon queued"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+          <div><div class="num">12</div><div class="label">排队中</div></div>
+        </div>
+        <div class="stat-mini">
+          <div class="icon done"><svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg></div>
+          <div><div class="num">6</div><div class="label">已完成</div></div>
+        </div>
+        <div class="stat-mini">
+          <div class="icon failed"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+          <div><div class="num">1</div><div class="label">失败</div></div>
+        </div>
+      </div>
+
+      <div class="filters" role="tablist">
+        <span class="chip" data-filter="all" aria-selected="true">全部 <span class="num">23</span></span>
+        <span class="chip" data-filter="running" aria-selected="false">运行中 <span class="num">4</span></span>
+        <span class="chip" data-filter="queued" aria-selected="false">排队 <span class="num">12</span></span>
+        <span class="chip" data-filter="done" aria-selected="false">已完成 <span class="num">6</span></span>
+        <span class="chip" data-filter="failed" aria-selected="false">失败 <span class="num">1</span></span>
+        <div class="spacer"></div>
+        <span class="chip" aria-selected="false">类型: 全部</span>
+        <span class="chip" aria-selected="false">来源: 全部</span>
+      </div>
+
+      <div class="list-head">
+        <span></span>
+        <span>任务 / 来源</span>
+        <span>进度</span>
+        <span>状态</span>
+        <span>预计完成</span>
+        <span style="text-align:right">操作</span>
+      </div>
+
+      <div class="task-list" id="taskList">
+        <div class="task" data-state="running">
+          <div class="state running"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg></div>
+          <div class="info">
+            <div class="title">抓取《剑来》最新章节</div>
+            <div class="meta">来源 <b>qidian.com</b> · 优先级 NORMAL · 队列 #t-2841</div>
+          </div>
+          <div class="progress">
+            <div class="bar"><span style="width: 78%"></span></div>
+            <div class="lbl"><span>78 / 100 章</span><span>78%</span></div>
+          </div>
+          <span class="pill running"><span class="dot"></span>运行中</span>
+          <div class="time"><strong>6 分钟后</strong>15:48 预计</div>
+          <div class="actions">
+            <button title="详情"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button title="暂停"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+            <button title="取消" class="danger"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+        </div>
+
+        <div class="task" data-state="running">
+          <div class="state running"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg></div>
+          <div class="info">
+            <div class="title">抓取《完美世界》新章节</div>
+            <div class="meta">来源 <b>biququ.com</b> · 优先级 HIGH · 队列 #t-2840</div>
+          </div>
+          <div class="progress">
+            <div class="bar"><span style="width: 42%"></span></div>
+            <div class="lbl"><span>42 / 100 章</span><span>42%</span></div>
+          </div>
+          <span class="pill running"><span class="dot"></span>运行中</span>
+          <div class="time"><strong>12 分钟后</strong>15:54 预计</div>
+          <div class="actions">
+            <button title="详情"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button title="暂停"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+            <button title="取消" class="danger"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+        </div>
+
+        <div class="task" data-state="running">
+          <div class="state running"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg></div>
+          <div class="info">
+            <div class="title">抓取《凡人修仙传》最新章节</div>
+            <div class="meta">来源 <b>shuquge.com</b> · 优先级 NORMAL · 队列 #t-2839</div>
+          </div>
+          <div class="progress">
+            <div class="bar warn"><span style="width: 23%"></span></div>
+            <div class="lbl"><span>18 / 80 章</span><span>23%</span></div>
+          </div>
+          <span class="pill running"><span class="dot"></span>运行中</span>
+          <div class="time"><strong>18 分钟后</strong>16:00 预计</div>
+          <div class="actions">
+            <button title="详情"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button title="暂停"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+            <button title="取消" class="danger"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+        </div>
+
+        <div class="task" data-state="running">
+          <div class="state running"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg></div>
+          <div class="info">
+            <div class="title">校验《庆余年》全文章节完整性</div>
+            <div class="meta">来源 <b>8shuwu.com</b> · 校验任务 · 队列 #t-2838</div>
+          </div>
+          <div class="progress">
+            <div class="bar"><span style="width: 91%"></span></div>
+            <div class="lbl"><span>728 / 800 章</span><span>91%</span></div>
+          </div>
+          <span class="pill running"><span class="dot"></span>运行中</span>
+          <div class="time"><strong>2 分钟后</strong>15:44 预计</div>
+          <div class="actions">
+            <button title="详情"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button title="暂停"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+            <button title="取消" class="danger"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+        </div>
+
+        <div class="task" data-state="queued">
+          <div class="state queued"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div class="info">
+            <div class="title">重新解析书源 yqkvip.com 规则</div>
+            <div class="meta">来源 <b>yqkvip.com</b> · 解析任务 · 队列 #t-2837</div>
+          </div>
+          <div class="progress">
+            <div class="bar"><span style="width: 0%"></span></div>
+            <div class="lbl"><span>等待中</span><span>—</span></div>
+          </div>
+          <span class="pill queued"><span class="dot"></span>排队</span>
+          <div class="time"><strong>~10 分钟</strong>等待空闲</div>
+          <div class="actions">
+            <button title="提升优先级"><svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5"/></svg></button>
+            <button title="详情"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button title="移除" class="danger"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4M16 6V4M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+          </div>
+        </div>
+
+        <div class="task" data-state="queued">
+          <div class="state queued"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div class="info">
+            <div class="title">抓取《遮天》最新章节</div>
+            <div class="meta">来源 <b>paoshu8.com</b> · 优先级 LOW · 队列 #t-2836</div>
+          </div>
+          <div class="progress">
+            <div class="bar"><span style="width: 0%"></span></div>
+            <div class="lbl"><span>等待中</span><span>—</span></div>
+          </div>
+          <span class="pill queued"><span class="dot"></span>排队</span>
+          <div class="time"><strong>~14 分钟</strong>等待空闲</div>
+          <div class="actions">
+            <button title="提升优先级"><svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5"/></svg></button>
+            <button title="详情"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button title="移除" class="danger"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4M16 6V4M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+          </div>
+        </div>
+
+        <div class="task" data-state="done">
+          <div class="state done"><svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg></div>
+          <div class="info">
+            <div class="title">抓取《最强狂兵》最新 50 章</div>
+            <div class="meta">来源 <b>ddxs.com</b> · 队列 #t-2835</div>
+          </div>
+          <div class="progress">
+            <div class="bar done"><span style="width: 100%"></span></div>
+            <div class="lbl"><span>50 / 50 章</span><span>100%</span></div>
+          </div>
+          <span class="pill done"><span class="dot"></span>已完成</span>
+          <div class="time"><strong>2 分钟前</strong>耗时 4m 18s</div>
+          <div class="actions">
+            <button title="查看结果"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button title="再跑一次"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
+          </div>
+        </div>
+
+        <div class="task" data-state="done">
+          <div class="state done"><svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg></div>
+          <div class="info">
+            <div class="title">同步《庆余年》目录</div>
+            <div class="meta">来源 <b>8shuwu.com</b> · 队列 #t-2834</div>
+          </div>
+          <div class="progress">
+            <div class="bar done"><span style="width: 100%"></span></div>
+            <div class="lbl"><span>728 章节</span><span>100%</span></div>
+          </div>
+          <span class="pill done"><span class="dot"></span>已完成</span>
+          <div class="time"><strong>8 分钟前</strong>耗时 1m 42s</div>
+          <div class="actions">
+            <button title="查看结果"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button title="再跑一次"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
+          </div>
+        </div>
+
+        <div class="task" data-state="failed">
+          <div class="state failed"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+          <div class="info">
+            <div class="title">抓取《雪中悍刀行》第 1247 章</div>
+            <div class="meta">来源 <b>xiaoshuo.com</b> · HTTP 401 · 队列 #t-2833</div>
+          </div>
+          <div class="progress">
+            <div class="bar failed"><span style="width: 18%"></span></div>
+            <div class="lbl"><span>失败于第 3 次重试</span><span>—</span></div>
+          </div>
+          <span class="pill failed"><span class="dot"></span>失败</span>
+          <div class="time"><strong>14 分钟前</strong>耗时 0m 38s</div>
+          <div class="actions">
+            <button title="查看错误"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></button>
+            <button title="重试"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
+            <button title="移除" class="danger"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4M16 6V4M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Theme toggle
+  (function(){
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-theme') || 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('legado-theme', next); } catch(e) {}
+      });
+    }
+  })();
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast success';
+    t.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>' + msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+  }
+
+  function updateStats() {
+    const tasks = document.querySelectorAll('.task');
+    const counts = { running: 0, queued: 0, done: 0, failed: 0 };
+    tasks.forEach(t => { const s = t.dataset.state; if (counts[s] !== undefined) counts[s]++; });
+    const total = tasks.length;
+    // Update stat mini numbers
+    const statNums = document.querySelectorAll('.stat-mini .num');
+    if (statNums.length >= 4) {
+      statNums[0].textContent = counts.running;
+      statNums[1].textContent = counts.queued;
+      statNums[2].textContent = counts.done;
+      statNums[3].textContent = counts.failed;
+    }
+    // Update chip counts
+    const chips = document.querySelectorAll('.filters .chip[data-filter]');
+    chips.forEach(c => {
+      const f = c.dataset.filter;
+      const num = c.querySelector('.num');
+      if (num) num.textContent = f === 'all' ? total : (counts[f] || 0);
+    });
+    // Update crumb
+    const crumb = document.querySelector('.topbar .crumb');
+    if (crumb) crumb.textContent = '/ ' + counts.running + ' 运行中 · ' + counts.queued + ' 排队 · ' + counts.done + ' 已完成 · ' + counts.failed + ' 失败';
+  }
+
+  // Filter chips with real filtering
+  const filterChips = document.querySelectorAll('.filters .chip[data-filter]');
+  filterChips.forEach(c => c.addEventListener('click', () => {
+    filterChips.forEach(x => x.setAttribute('aria-selected', 'false'));
+    c.setAttribute('aria-selected', 'true');
+    const filter = c.dataset.filter;
+    document.querySelectorAll('.task').forEach(t => {
+      t.style.display = (filter === 'all' || t.dataset.state === filter) ? '' : 'none';
+    });
+  }));
+
+  // New Task Modal
+  const newTaskModal = document.getElementById('newTaskModal');
+  function openNewTaskModal() {
+    document.getElementById('taskBook').value = '';
+    document.getElementById('taskSource').value = '';
+    document.getElementById('taskChapters').value = '100';
+    document.getElementById('taskBookErr').style.display = 'none';
+    newTaskModal.querySelectorAll('.ctrl-seg button').forEach(b => {
+      b.setAttribute('aria-selected', b.textContent === 'NORMAL' ? 'true' : 'false');
+    });
+    newTaskModal.classList.add('show');
+  }
+  function closeNewTaskModal() { newTaskModal.classList.remove('show'); }
+  document.getElementById('newTaskBtn').addEventListener('click', openNewTaskModal);
+  document.getElementById('newTaskClose').addEventListener('click', closeNewTaskModal);
+  document.getElementById('newTaskCancel').addEventListener('click', closeNewTaskModal);
+  newTaskModal.addEventListener('click', e => { if (e.target === newTaskModal) closeNewTaskModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && newTaskModal.classList.contains('show')) closeNewTaskModal(); });
+
+  // Modal segmented control
+  newTaskModal.querySelectorAll('.ctrl-seg').forEach(seg => {
+    seg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', 'false'));
+      b.setAttribute('aria-selected', 'true');
+    }));
+  });
+
+  document.getElementById('newTaskConfirm').addEventListener('click', () => {
+    const book = document.getElementById('taskBook').value.trim();
+    if (!book) { document.getElementById('taskBookErr').style.display = ''; return; }
+    document.getElementById('taskBookErr').style.display = 'none';
+    const source = document.getElementById('taskSource').value.trim() || 'qidian.com';
+    const priority = newTaskModal.querySelector('.ctrl-seg button[aria-selected="true"]')?.textContent || 'NORMAL';
+    const chapters = parseInt(document.getElementById('taskChapters').value) || 100;
+    const taskId = 't-' + (2842 + Math.floor(Math.random() * 100));
+    const taskEl = document.createElement('div');
+    taskEl.className = 'task';
+    taskEl.dataset.state = 'queued';
+    taskEl.innerHTML = '<div class="state queued"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>'
+      + '<div class="info"><div class="title">抓取《' + book + '》最新章节</div><div class="meta">来源 <b>' + source + '</b> · 优先级 ' + priority + ' · 队列 #' + taskId + '</div></div>'
+      + '<div class="progress"><div class="bar"><span style="width: 0%"></span></div><div class="lbl"><span>等待中</span><span>—</span></div></div>'
+      + '<span class="pill queued"><span class="dot"></span>排队</span>'
+      + '<div class="time"><strong>~10 分钟</strong>等待空闲</div>'
+      + '<div class="actions"><button title="提升优先级"><svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5"/></svg></button><button title="详情"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button title="移除" class="danger" onclick="this.closest(\'.task\').remove();updateStats();"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4M16 6V4M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>';
+    document.getElementById('taskList').prepend(taskEl);
+    updateStats();
+    closeNewTaskModal();
+    showToast('任务「' + book + '」已创建');
+  });
+
+  // Clear done tasks
+  document.getElementById('clearDoneBtn').addEventListener('click', () => {
+    const done = document.querySelectorAll('.task[data-state="done"]');
+    if (!done.length) { showToast('没有已完成的任务'); return; }
+    done.forEach(t => t.remove());
+    updateStats();
+    showToast('已清除 ' + done.length + ' 个已完成任务');
+  });
+
+  // Task action button handlers (delegate)
+  document.getElementById('taskList').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const task = btn.closest('.task');
+    if (!task) return;
+    const title = btn.getAttribute('title');
+    if (title === '暂停') {
+      task.dataset.state = 'queued';
+      const pill = task.querySelector('.pill');
+      if (pill) { pill.className = 'pill queued'; pill.innerHTML = '<span class="dot"></span>已暂停'; }
+      showToast('任务已暂停');
+      updateStats();
+    } else if (title === '取消') {
+      if (confirm('确定取消此任务？')) { task.remove(); updateStats(); showToast('任务已取消'); }
+    } else if (title === '移除') {
+      task.remove(); updateStats(); showToast('任务已移除');
+    } else if (title === '重试') {
+      task.dataset.state = 'queued';
+      const state = task.querySelector('.state');
+      if (state) { state.className = 'state queued'; state.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'; }
+      const pill = task.querySelector('.pill');
+      if (pill) { pill.className = 'pill queued'; pill.innerHTML = '<span class="dot"></span>排队'; }
+      const bar = task.querySelector('.progress .bar span');
+      if (bar) bar.style.width = '0%';
+      showToast('任务已重新排队');
+      updateStats();
+    } else if (title === '再跑一次') {
+      showToast('任务已重新创建');
+    } else if (title === '详情' || title === '查看结果' || title === '查看错误') {
+      showToast(title + '：' + (task.querySelector('.title')?.textContent || ''));
+    } else if (title === '提升优先级') {
+      showToast('优先级已提升');
+    }
+  });
+</script>
+
+<div class="modal-overlay" id="newTaskModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>新建任务</h3>
+      <button class="modal-close" id="newTaskClose" aria-label="关闭"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label>书名</label>
+        <div>
+          <label class="input"><input type="text" id="taskBook" placeholder="输入书名…" /></label>
+          <div id="taskBookErr" style="display:none;color:var(--danger);font-size:12px;margin-top:4px">请输入书名</div>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>来源</label>
+        <label class="input">
+          <input type="text" id="taskSource" placeholder="qidian.com" />
+        </label>
+      </div>
+      <div class="form-field">
+        <label>优先级</label>
+        <span class="ctrl-seg">
+          <button type="button" aria-selected="false">LOW</button>
+          <button type="button" aria-selected="true">NORMAL</button>
+          <button type="button" aria-selected="false">HIGH</button>
+        </span>
+      </div>
+      <div class="form-field">
+        <label>章节数</label>
+        <label class="input"><input type="number" id="taskChapters" value="100" min="1" /></label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" type="button" id="newTaskCancel">取消</button>
+      <button class="btn btn-primary" type="button" id="newTaskConfirm">创建任务</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

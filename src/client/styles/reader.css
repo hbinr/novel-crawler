@@ -1,0 +1,270 @@
+.preview-page {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  /* 用 dvh 兜 iOS Safari 100vh 跳动；同时 fallback 到 vh */
+  height: calc(100vh - 116px);
+  height: calc(100dvh - 116px);
+}
+@media (max-width: 1000px) {
+  .preview-page { grid-template-columns: 260px 1fr; }
+}
+@media (max-width: 720px) {
+  .preview-page { grid-template-columns: 1fr; height: auto; }
+}
+
+.preview-sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 0;
+}
+.preview-book-picker {
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.preview-book-picker label {
+  font-size: 11px;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.preview-chapter-list {
+  flex: 1;
+  /* 自身不再滚动 — 由内嵌 VirtualList 接管滚动；保留 padding 让行不贴边 */
+  padding: 4px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.preview-chapter-list > .virtual-list {
+  flex: 1;
+}
+.preview-chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all var(--dur-micro) var(--ease-out);
+}
+.preview-chapter-item:hover { background: var(--bg-2); color: var(--text-hi); }
+.preview-chapter-item.active {
+  background: var(--primary-soft);
+  color: var(--text-hi);
+  font-weight: 500;
+}
+.preview-chapter-item .idx {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-lo);
+  min-width: 32px;
+}
+.preview-chapter-item.active .idx { color: var(--primary); }
+.preview-chapter-item .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.preview-chapter-item .status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.preview-chapter-item .status-dot.done { background: var(--success); }
+.preview-chapter-item .status-dot.failed { background: var(--error); }
+.preview-chapter-item .status-dot.downloading { background: var(--running); animation: live-pulse 1.4s infinite; }
+.preview-chapter-item .status-dot.pending { background: var(--text-lo); opacity: 0.4; }
+.preview-chapter-item .status-dot.skipped { background: var(--text-lo); }
+
+/* === 实际使用的 .preview-chapter-row（VirtualList 渲染） — 字号/行高放大 === */
+.preview-chapter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  height: 34px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out),
+              color var(--dur-micro) var(--ease-out);
+  user-select: none;
+}
+.preview-chapter-row:hover { background: var(--bg-2); color: var(--text-hi); }
+.preview-chapter-row.active {
+  background: var(--primary-soft);
+  color: var(--text-hi);
+  font-weight: 500;
+  box-shadow: inset 2px 0 0 var(--primary);
+}
+.preview-chapter-row .idx {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-lo);
+  min-width: 38px;
+  letter-spacing: 0.02em;
+}
+.preview-chapter-row.active .idx { color: var(--primary); }
+.preview-chapter-row .title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+}
+.preview-chapter-row .status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-lo);
+  opacity: 0.5;
+}
+.preview-chapter-row .status-dot.done { background: var(--success); opacity: 1; }
+.preview-chapter-row .status-dot.failed { background: var(--error); opacity: 1; }
+.preview-chapter-row .status-dot.downloading {
+  background: var(--running);
+  opacity: 1;
+  animation: live-pulse 1.4s var(--ease-out) infinite;
+}
+.preview-chapter-row .status-dot.pending { background: var(--text-lo); opacity: 0.4; }
+.preview-chapter-row .status-dot.skipped { background: var(--text-lo); opacity: 0.5; }
+
+.preview-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+.preview-toolbar .spacer { flex: 1; }
+.preview-toolbar .group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  height: 28px;
+  font-size: 12px;
+  color: var(--text-mid);
+}
+.preview-toolbar .group button {
+  display: grid; place-items: center;
+  width: 24px; height: 24px;
+  background: transparent;
+  border: 0;
+  color: var(--text-mid);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.preview-toolbar .group button:hover { background: var(--bg-3); color: var(--text-hi); }
+.preview-toolbar .group button:disabled { opacity: 0.3; cursor: not-allowed; }
+.preview-toolbar .group .v {
+  font-family: var(--font-mono);
+  min-width: 30px;
+  text-align: center;
+  color: var(--text-hi);
+}
+.preview-toolbar .color-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  height: 28px;
+}
+.preview-toolbar .color-picker .swatch {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--dur-micro) var(--ease-out);
+}
+.preview-toolbar .color-picker .swatch:hover { transform: scale(1.15); }
+.preview-toolbar .color-picker .swatch.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-ring);
+}
+
+/* 阅读区 — 唯一会被阅读设置影响的地方 */
+.preview-reader {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--reader-bg, #f7f5ee);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 40px 48px;
+  color: var(--reader-fg, #2a2620);
+  font-size: var(--reader-size, 17px);
+  /* line-height 不再驱动段落行高（每行独占 div），交由 .preview-reader-line 控制 */
+  transition: background var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+  min-height: 0;
+}
+@media (max-width: 900px) {
+  .preview-reader { padding: 32px 28px; }
+}
+.preview-reader h1 {
+  font-size: 1.6em;
+  font-weight: 600;
+  margin: 0 0 1.6em;
+  padding-bottom: 0.8em;
+  border-bottom: 1px solid var(--reader-border, rgba(0, 0, 0, 0.1));
+  text-align: center;
+  color: var(--reader-fg, #2a2620);
+}
+/* 每行独占一行：行高 = 字号 + 10*lineHeight 倍数 → 行间像素距 = 10 * lineHeight */
+.preview-reader-line {
+  line-height: calc(var(--reader-size) + 10px * var(--reader-lh, 1));
+  min-height: calc(var(--reader-size) + 10px * var(--reader-lh, 1));
+  white-space: pre-wrap;
+  word-break: break-word;
+  letter-spacing: 0.01em;
+}
+.preview-reader-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  color: var(--reader-fg, #2a2620);
+  opacity: 0.6;
+  font-size: 14px;
+}
+.preview-reader-empty .ico {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.preview-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-mid);
+  flex-shrink: 0;
+}
+.preview-pagination .pos { font-family: var(--font-mono); }

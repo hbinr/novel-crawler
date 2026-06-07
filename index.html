@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 系统偏好下的 address bar 色；用户显式选择由下面的 init 脚本更新 -->
+    <meta
+      name="theme-color"
+      content="#0b0d12"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="theme-color"
+      content="#f7f8fa"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="description"
+      content="小说爬虫开发者控制台 — 批量管理 yuebiqu 站点抓取任务，实时查看任务进度和章节状态。"
+    />
+    <meta name="og:title" content="Novel Crawler Console" />
+    <meta
+      name="og:description"
+      content="开发者控制台，批量管理小说抓取任务、实时日志、章节预览。"
+    />
+    <meta name="og:type" content="website" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%237c5cff%22%2F%3E%3Cpath%20d%3D%22M9%208.5h14v18l-7-4-7%204z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E"
+    />
+    <title>Novel Crawler Console</title>
+
+    <!--
+      主题初始化 — 在 CSS 加载前同步运行
+      1) 读 localStorage.theme（"light" / "dark" / "system"）
+      2) "system" / 未设  → 跟随 prefers-color-scheme
+      3) 写 data-theme 到 <html>，tokens.css 会立刻按主题渲染
+      4) 同步更新 address bar 的 theme-color，避免 mobile 浏览器色偏
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("theme");
+          var resolved;
+          if (stored === "light" || stored === "dark") {
+            resolved = stored;
+          } else {
+            // "system" / null / 异常值 → 跟随系统
+            resolved = window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+          }
+          document.documentElement.setAttribute("data-theme", resolved);
+          // 显式选过 light/dark 时，覆盖默认的 media-query theme-color
+          if (stored === "light" || stored === "dark") {
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute("content", resolved === "light" ? "#f7f8fa" : "#0b0d12");
+          }
+        } catch (_) {
+          // 隐私模式 / 异常 → 退回到 dark
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
+
+    <!-- 关键 CSS 内联 — 让首屏不用等 main.css 就能有 shell 的正确布局 / 背景色 -->
+    <style>
+      :root {
+        --bg-0: #0b0d12;
+        --bg-1: #11141b;
+        --border: #222836;
+        --text-hi: #e6e9f2;
+        --text-mid: #a6adc0;
+        --text-lo: #5b6377;
+        --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      }
+      :root[data-theme="light"] {
+        --bg-0: #f7f8fa;
+        --bg-1: #ffffff;
+        --border: #e4e7ee;
+        --text-hi: #0b0d12;
+        --text-mid: #4a5160;
+        --text-lo: #8a92a2;
+      }
+      html, body, #root { height: 100%; margin: 0; }
+      body {
+        background: var(--bg-0);
+        color: var(--text-hi);
+        font-family: var(--font-ui);
+        font-size: 13px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      .app-skeleton {
+        display: grid;
+        grid-template-columns: 224px 1fr;
+        grid-template-rows: 48px 1fr;
+        height: 100vh;
+      }
+      .app-skeleton .topbar-skel {
+        grid-column: 1 / -1;
+        background: var(--bg-1);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        color: var(--text-mid);
+      }
+      .app-skeleton .sidebar-skel {
+        background: var(--bg-1);
+        border-right: 1px solid var(--border);
+        padding: 12px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .app-skeleton .sidebar-skel span {
+        height: 28px;
+        border-radius: 4px;
+        background: var(--bg-1);
+        border: 1px solid var(--border);
+      }
+      .app-skeleton .main-skel {
+        padding: 24px;
+        color: var(--text-lo);
+      }
+    </style>
+
+    <!-- 字体：Geist Sans + Geist Mono（替换 Inter/JetBrains Mono），CJK 走本地 PingFang/思源 -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      />
+    </noscript>
+  </head>
+  <body>
+    <!-- 键盘用户：跳过导航直接进入主内容 -->
+    <a class="skip-link" href="#main-content">跳到主内容</a>
+    <!-- 首屏骨架：JS 加载完前展示，避免 FOUC；React 挂载时自动替换 -->
+    <div id="root">
+      <div class="app-skeleton">
+        <div class="topbar-skel">Novel Crawler</div>
+        <div class="sidebar-skel">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="main-skel">正在加载…</div>
+      </div>
+    </div>
+    <script type="module" src="/src/client/main.tsx"></script>
+  </body>
+</html>

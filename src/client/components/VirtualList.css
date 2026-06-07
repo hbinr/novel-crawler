@@ -1,0 +1,98 @@
+.virtual-list {
+  /* 默认由父容器决定高度 */
+}
+.virtual-list::-webkit-scrollbar {
+  width: 8px;
+}
+.virtual-list::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+  border: 1px solid var(--bg-0);
+  background-clip: padding-box;
+}
+
+/* chapter row — 用于 TaskDetail / Preview 共享 */
+.chapter-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 90px 100px 70px 70px 80px;
+  align-items: center;
+  height: 100%;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-hi);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 80ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.chapter-row:hover {
+  background: var(--bg-2);
+}
+.chapter-row.active {
+  background: var(--primary-soft);
+}
+.chapter-row .num,
+.chapter-row .mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.chapter-row .right {
+  text-align: right;
+}
+.chapter-row .title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chapter-row .status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chapter-row .status .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chapter-row .status.pending .dot { background: var(--queued); }
+.chapter-row .status.downloading .dot { background: var(--running); box-shadow: 0 0 6px var(--running); }
+.chapter-row .status.done .dot { background: var(--success); }
+.chapter-row .status.failed .dot { background: var(--error); }
+.chapter-row .status.skipped .dot { background: var(--text-lo); }
+
+/* preview 侧边章节 — 单行紧凑 */
+.preview-chapter-row {
+  display: grid;
+  grid-template-columns: 48px 1fr 18px;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 10px;
+  font-size: 12px;
+  color: var(--text-mid);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background 80ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.preview-chapter-row:hover { background: var(--bg-2); color: var(--text-hi); }
+.preview-chapter-row.active { background: var(--primary-soft); color: var(--text-hi); }
+.preview-chapter-row .idx {
+  font-family: var(--font-mono);
+  color: var(--text-lo);
+  font-size: 10px;
+}
+.preview-chapter-row .title { overflow: hidden; text-overflow: ellipsis; }
+.preview-chapter-row .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-lo);
+  justify-self: center;
+}
+.preview-chapter-row .status-dot.done { background: var(--success); }
+.preview-chapter-row .status-dot.skipped { background: var(--text-lo); }
+.preview-chapter-row .status-dot.downloading { background: var(--running); }
+.preview-chapter-row .status-dot.failed { background: var(--error); }
+.preview-chapter-row .status-dot.pending { background: var(--queued); }

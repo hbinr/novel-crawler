@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>章节预览 · Legado</title>
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('legado-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  })();
+</script>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #ffffff; --surface-2: #fafbfc;
+    --surface-3: #f6f7f9; --surface-4: #f1f3f6;
+    --fg: #181d26; --fg-2: #333333; --muted: rgba(4, 14, 32, 0.69); --meta: var(--muted);
+    --border: #e0e2e6; --border-soft: #eef0f3; --track: #d4d6dc;
+    --accent: #1b61c9;
+    --accent-soft: rgba(27, 97, 201, 0.08);
+    --accent-soft-2: rgba(27, 97, 201, 0.10);
+    --accent-soft-3: rgba(27, 97, 201, 0.12);
+    --accent-on: #ffffff; --accent-hover: #254fad;
+    --accent-active: color-mix(in oklab, var(--accent), black 14%);
+    --success: #006400; --success-soft: rgba(0, 100, 0, 0.08);
+    --warn: #eab308; --warn-soft: rgba(234, 179, 8, 0.12); --warn-ink: #92670a;
+    --danger: #dc2626; --danger-soft: rgba(220, 38, 38, 0.08);
+    --font-display: "Haas Groot Disp", Haas, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-body: Haas, -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+    --font-reader: "Iowan Old Style", "Charter", "PingFang SC", "Source Han Serif", "Noto Serif CJK SC", Georgia, serif;
+    --text-xs: 12px; --text-sm: 14px; --text-base: 16px; --text-lg: 20px;
+    --text-xl: 24px; --text-2xl: 32px; --text-3xl: 40px;
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+    --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
+    --radius-sm: 12px; --radius-md: 16px; --radius-pill: 9999px;
+    --elev-raised:
+      0 0 1px rgba(0, 0, 0, 0.32), 0 0 2px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(45, 127, 249, 0.28), inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+    --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 70%);
+    --motion-fast: 150ms; --motion-base: 200ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    --bg: #0d1117; --surface: #161b22; --surface-2: #1c2128;
+    --surface-3: #22272e; --surface-4: #2d333b;
+    --fg: #e6edf3; --fg-2: #c9d1d9; --muted: rgba(230, 237, 243, 0.55); --meta: var(--muted);
+    --border: #30363d; --border-soft: #21262d; --track: #484f58;
+    --accent: #4493f8;
+    --accent-soft: rgba(68, 147, 248, 0.16);
+    --accent-soft-2: rgba(68, 147, 248, 0.20);
+    --accent-soft-3: rgba(68, 147, 248, 0.24);
+    --accent-on: #0d1117; --accent-hover: #58a6ff;
+    --accent-active: color-mix(in oklab, var(--accent), white 10%);
+    --success: #3fb950; --success-soft: rgba(63, 185, 80, 0.15);
+    --warn: #d29922; --warn-soft: rgba(210, 153, 34, 0.18); --warn-ink: #e3b341;
+    --danger: #f85149; --danger-soft: rgba(248, 81, 73, 0.15);
+    --elev-raised:
+      0 0 1px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.4),
+      0 1px 3px rgba(68, 147, 248, 0.28), inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+    color-scheme: dark;
+  }
+
+  /* Reader themes */
+  .reader-body { --r-bg: var(--surface); --r-fg: var(--fg); --r-muted: var(--muted); }
+  .reader-body[data-reader="sepia"] { --r-bg: #f4ecd8; --r-fg: #5b4636; --r-muted: rgba(91, 70, 54, 0.6); }
+  .reader-body[data-reader="green"] { --r-bg: #e8f5e9; --r-fg: #2e4a30; --r-muted: rgba(46, 74, 48, 0.6); }
+  .reader-body[data-reader="dark"] { --r-bg: #1a1a2e; --r-fg: #c8c8d4; --r-muted: rgba(200, 200, 212, 0.55); }
+  .reader-body[data-reader="light"] { --r-bg: #ffffff; --r-fg: #181d26; --r-muted: rgba(4, 14, 32, 0.69); }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body); color: var(--fg); background: var(--bg); -webkit-font-smoothing: antialiased; letter-spacing: 0.08px; transition: background var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: var(--accent-hover); }
+  a:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
+
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar { border-right: 1px solid var(--border); background: var(--surface-2); padding: var(--space-6) var(--space-4); position: sticky; top: 0; height: 100vh; overflow-y: auto; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 18px; font-weight: 500; color: var(--fg); margin-bottom: var(--space-8); }
+  .brand-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; color: var(--accent-on); font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+  .nav-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); padding: 0 var(--space-3); margin: var(--space-5) 0 var(--space-2); }
+  .nav { list-style: none; padding: 0; margin: 0; }
+  .nav a { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; color: var(--fg-2); font-size: 14px; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+  .nav a:hover { background: var(--surface-3); color: var(--fg); }
+  .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+  .nav svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; flex: 0 0 18px; }
+  .nav .badge { margin-left: auto; font-family: var(--font-mono); font-size: 11px; background: var(--surface-4); color: var(--fg-2); padding: 1px 7px; border-radius: var(--radius-pill); }
+  .nav a[aria-current="page"] .badge { background: var(--accent-soft-3); color: var(--accent); }
+  .nav-foot { margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid var(--border-soft); }
+  .nav-foot small { display: block; color: var(--muted); font-size: 12px; padding: 4px 12px; }
+  .nav-foot small + small { margin-top: 2px; }
+
+  .topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 5; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .topbar h1 { margin: 0; font-size: 18px; font-weight: 500; font-family: var(--font-display); }
+  .topbar .crumb { color: var(--muted); font-size: 13px; }
+  .topbar .spacer { flex: 1; }
+  .topbar .user { display: flex; align-items: center; gap: 10px; padding: 4px 10px 4px 4px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .topbar .user .avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); color: var(--accent-on); display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+  .topbar .user span { font-size: 13px; }
+
+  .icon-btn { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); color: var(--fg-2); cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .icon-btn:hover { background: var(--surface-3); color: var(--fg); }
+  .icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .icon-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .icon-btn .sun, .icon-btn .moon { display: none; }
+  [data-theme="light"] .icon-btn .sun, :root:not([data-theme]) .icon-btn .sun { display: block; }
+  [data-theme="dark"] .icon-btn .moon { display: block; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border-radius: var(--radius-sm); font: 500 14px/1 var(--font-body); letter-spacing: 0.08px; border: 1px solid transparent; cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .btn-primary { background: var(--accent); color: var(--accent-on); }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--surface); color: var(--fg); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--surface-3); }
+  .btn-ghost { background: transparent; color: var(--fg-2); }
+  .btn-ghost:hover { background: var(--surface-4); color: var(--fg); }
+  .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  .input { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; color: var(--fg); transition: background var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .input svg { width: 14px; height: 14px; stroke: var(--muted); fill: none; stroke-width: 1.8; }
+  .input input { border: 0; outline: 0; flex: 1; background: transparent; font: inherit; color: inherit; }
+  .input:focus-within { border-color: var(--accent); box-shadow: var(--focus-ring); }
+
+  .main { min-width: 0; }
+  .content { padding: var(--space-8) var(--space-6) var(--space-12); }
+  .content > * + * { margin-top: var(--space-5); }
+
+  /* Reader 3-col layout */
+  .reader { display: grid; grid-template-columns: 280px minmax(0, 1fr) 300px; gap: var(--space-5); }
+
+  /* Chapter list */
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--elev-raised); overflow: hidden; align-self: start; max-height: 78vh; display: flex; flex-direction: column; position: sticky; top: 88px; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .toc-head { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 8px; }
+  .toc-head h3 { margin: 0; font-size: 13px; font-weight: 600; flex: 1; line-height: 1.3; }
+  .toc-head h3 small { display: block; font-weight: 400; color: var(--muted); font-size: 11px; font-family: var(--font-mono); margin-top: 2px; }
+  .toc-search { padding: 8px 12px; border-bottom: 1px solid var(--border-soft); }
+  .toc-search .input { width: 100%; }
+  .toc-list { list-style: none; padding: 4px 0; margin: 0; overflow-y: auto; flex: 1; }
+  .toc-list li { padding: 6px 16px; cursor: pointer; font-size: 12.5px; color: var(--fg-2); display: flex; align-items: center; gap: 8px; border-left: 2px solid transparent; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .toc-list li:hover { background: var(--surface-3); color: var(--fg); }
+  .toc-list li.active { background: var(--accent-soft); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  .toc-list li .num { font-family: var(--font-mono); font-size: 10px; color: var(--muted); flex: 0 0 56px; }
+  .toc-list li.active .num { color: var(--accent); }
+
+  /* Center: reader */
+  .reader-main { min-width: 0; }
+  .reader-top { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--elev-raised); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-3); display: flex; align-items: center; gap: var(--space-3); transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .reader-top .book { display: flex; align-items: center; gap: var(--space-3); flex: 1; min-width: 0; }
+  .reader-top .cover { width: 40px; height: 56px; border-radius: 6px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); display: grid; place-items: center; color: var(--accent-on); font-family: var(--font-display); font-weight: 600; font-size: 18px; flex: 0 0 40px; }
+  .reader-top .book-info { min-width: 0; }
+  .reader-top .book-title { font-size: 14px; font-weight: 600; }
+  .reader-top .meta { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
+  .reader-top .meta b { color: var(--fg-2); font-weight: 500; }
+  .reader-top .progress { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+  .reader-top .progress .bar { width: 100px; height: 4px; background: var(--surface-4); border-radius: 2px; overflow: hidden; }
+  .reader-top .progress .bar span { display: block; height: 100%; background: var(--accent); transition: width var(--motion-base) var(--ease-standard); }
+  .reader-top .progress .pct { font-family: var(--font-mono); }
+
+  .reader-body { background: var(--r-bg); color: var(--r-fg); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--elev-raised); padding: var(--space-8) var(--space-12); max-height: 65vh; overflow-y: auto; transition: background var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .reader-body h1 { font-family: var(--font-reader); font-size: clamp(22px, 3.2vw, 32px); font-weight: 600; color: var(--r-fg); margin: 0 0 8px; text-align: center; letter-spacing: 0; line-height: 1.3; overflow-wrap: anywhere; transition: color .3s; }
+  .reader-body .sub { text-align: center; color: var(--r-muted); font-family: var(--font-mono); font-size: 12px; margin-bottom: var(--space-8); transition: color .3s; }
+  .reader-body p { font-family: var(--font-reader); line-height: 1.95; color: var(--r-fg); margin: 0 0 1.2em; text-indent: 2em; text-align: justify; text-wrap: pretty; overflow-wrap: anywhere; transition: color .3s; font-size: var(--reader-fs, 17px); }
+  .reader-body p:first-of-type::first-letter { font-size: 1.4em; font-weight: 600; }
+
+  .reader-foot { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) 0; margin-top: var(--space-6); border-top: 1px solid var(--border-soft); flex-wrap: wrap; gap: var(--space-3); }
+  .reader-foot .pager { display: flex; gap: 8px; align-items: center; }
+  .reader-foot .pager button { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--fg-2); display: inline-flex; align-items: center; gap: 6px; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .reader-foot .pager button:hover { background: var(--surface-3); color: var(--fg); }
+  .reader-foot .pager button.primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+  .reader-foot .pager button.primary:hover { background: var(--accent-hover); }
+  .reader-foot .pager button svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .reader-foot .actions { display: flex; gap: 4px; }
+  .reader-foot .actions button { background: transparent; border: 1px solid transparent; padding: 6px 8px; border-radius: 6px; color: var(--muted); cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+  .reader-foot .actions button:hover { background: var(--surface-4); color: var(--fg); }
+  .reader-foot .actions svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+  /* Right: meta sidebar */
+  .meta-pane { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--elev-raised); padding: var(--space-4); align-self: start; position: sticky; top: 88px; transition: background var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard); }
+  .meta-pane h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 8px; }
+  .meta-pane h4:not(:first-child) { margin-top: var(--space-4); }
+  .meta-pane dl { margin: 0; }
+  .meta-pane .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border-soft); }
+  .meta-pane .row:last-child { border-bottom: 0; }
+  .meta-pane .row dt { color: var(--muted); }
+  .meta-pane .row dd { margin: 0; color: var(--fg); font-family: var(--font-mono); font-size: 12px; }
+  .meta-pane .src-card { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--border-soft); border-radius: 10px; margin-top: 8px; }
+  .meta-pane .src-card .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex: 0 0 8px; }
+  .meta-pane .src-card .name { font-size: 13px; font-weight: 500; }
+  .meta-pane .src-card .name small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; font-family: var(--font-mono); margin-top: 1px; }
+
+  .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .controls button { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 8px; padding: 8px; font-size: 12px; color: var(--fg-2); cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+  .controls button:hover { background: var(--surface-3); color: var(--fg); border-color: var(--border); }
+  .controls svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .controls.stacked { grid-template-columns: 1fr; }
+  .controls.stacked button { justify-content: flex-start; }
+
+  /* Reader theme picker */
+  .reader-themes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+  .theme-swatch { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard); }
+  .theme-swatch:hover { box-shadow: 0 0 0 2px var(--accent-soft); }
+  .theme-swatch.active { border-color: var(--accent); }
+  .swatch-label { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+
+  @media (max-width: 1400px) {
+    .reader { grid-template-columns: 240px minmax(0, 1fr) 260px; gap: var(--space-4); }
+  }
+  @media (max-width: 1280px) {
+    .reader { grid-template-columns: 220px minmax(0, 1fr) 240px; }
+    .reader-body { padding: var(--space-6) var(--space-7); }
+  }
+  @media (max-width: 1100px) {
+    .reader { grid-template-columns: 1fr; }
+    .toc, .meta-pane { position: static; max-height: none; }
+    .toc-list { max-height: 260px; }
+  }
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; padding: var(--space-4); border-right: 0; border-bottom: 1px solid var(--border); }
+    .sidebar .nav-label, .sidebar .nav-foot, .nav .badge { display: none; }
+    .nav { display: flex; flex-wrap: wrap; gap: 4px; }
+    .nav a { padding: 6px 10px; font-size: 12px; }
+    .content { padding: var(--space-5) var(--space-4) var(--space-8); }
+    .topbar { padding: var(--space-3) var(--space-4); }
+    .topbar h1 { font-size: 16px; }
+    .topbar .crumb { display: none; }
+    .reader-body { padding: var(--space-5) var(--space-4); }
+    .reader-body h1 { font-size: 24px; }
+    .reader-body p { font-size: 16px; }
+    .reader-top { flex-wrap: wrap; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; } }
+  .toast { position: fixed; bottom: var(--space-6); right: var(--space-6); z-index: 200; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--elev-hover); padding: 12px 20px; font-size: 14px; color: var(--fg); display: flex; align-items: center; gap: 10px; animation: toastIn var(--motion-base) var(--ease-standard); }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast svg { width: 18px; height: 18px; stroke: var(--success); fill: none; stroke-width: 1.8; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">L</span><span>Legado</span></div>
+    <div class="nav-label">控制台</div>
+    <ul class="nav" role="navigation">
+      <li><a href="index.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>屏幕索引</a></li>
+      <li><a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M3 12l3-7h4l3 7 3-7h4l3 7"/><path d="M3 19h18"/></svg>总览仪表盘</a></li>
+      <li><a href="sources.html"><svg viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 013 3v13H7a3 3 0 01-3-3V4z"/><path d="M4 17h15"/></svg>书源管理<span class="badge">15</span></a></li>
+      <li><a href="tasks.html"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>任务列表<span class="badge">23</span></a></li>
+      <li><a href="logs.html"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l2 2 4-4M7 15h10"/></svg>运行日志</a></li>
+    </ul>
+    <div class="nav-label">内容</div>
+    <ul class="nav">
+      <li><a href="preview.html" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 9h18M7 13h6M7 16h10"/></svg>章节预览</a></li>
+      <li><a href="settings.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>系统设置</a></li>
+    </ul>
+    <div class="nav-foot"><small>v2.0.4 · build a7c2e1f</small><small>本地服务 · 在线</small></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>章节预览</h1>
+      <span class="crumb">/ 《剑来》 · 第 1247 章</span>
+      <div class="spacer"></div>
+      <button class="icon-btn" type="button" id="themeToggle" aria-label="切换主题" title="切换主题">
+        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+      <button class="btn btn-ghost" type="button"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>上一章</button>
+      <button class="btn btn-ghost" type="button"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>下一章</button>
+      <button class="btn btn-secondary" type="button"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h12"/></svg>目录</button>
+      <button class="btn btn-primary" type="button"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>导出 EPUB</button>
+      <div class="user"><span class="avatar">R</span><span>rui@legado.local</span></div>
+    </div>
+
+    <div class="content">
+      <div class="reader">
+        <!-- Chapter list -->
+        <aside class="toc" aria-label="章节目录">
+          <div class="toc-head">
+            <h3>《剑来》<small>共 1,247 章 · 烽火戏诸侯</small></h3>
+          </div>
+          <div class="toc-search">
+            <label class="input">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input type="search" placeholder="跳转到章节…" />
+            </label>
+          </div>
+          <ul class="toc-list">
+            <li><span class="num">第 1241 章</span><span>问道长生（三十）</span></li>
+            <li><span class="num">第 1242 章</span><span>问道长生（三十一）</span></li>
+            <li><span class="num">第 1243 章</span><span>问道长生（三十二）</span></li>
+            <li><span class="num">第 1244 章</span><span>问道长生（三十三）</span></li>
+            <li><span class="num">第 1245 章</span><span>问道长生（三十四）</span></li>
+            <li><span class="num">第 1246 章</span><span>问道长生（三十五）</span></li>
+            <li class="active"><span class="num">第 1247 章</span><span>问道长生（三十六）</span></li>
+            <li><span class="num">第 1248 章</span><span>问道长生（三十七）</span></li>
+            <li><span class="num">第 1249 章</span><span>问道长生（三十八）</span></li>
+            <li><span class="num">第 1250 章</span><span>问道长生（三十九）</span></li>
+            <li><span class="num">第 1251 章</span><span>问道长生（四十）</span></li>
+            <li><span class="num">第 1252 章</span><span>问道长生（四十一）</span></li>
+            <li><span class="num">第 1253 章</span><span>问道长生（四十二）</span></li>
+            <li><span class="num">第 1254 章</span><span>问道长生（四十三）</span></li>
+            <li><span class="num">第 1255 章</span><span>问道长生（四十四）</span></li>
+            <li><span class="num">第 1256 章</span><span>问道长生（四十五）</span></li>
+            <li><span class="num">第 1257 章</span><span>问道长生（四十六）</span></li>
+            <li><span class="num">第 1258 章</span><span>问道长生（四十七）</span></li>
+            <li><span class="num">第 1259 章</span><span>问道长生（四十八）</span></li>
+            <li><span class="num">第 1260 章</span><span>问道长生（四十九）</span></li>
+          </ul>
+        </aside>
+
+        <!-- Reader body -->
+        <section class="reader-main">
+          <div class="reader-top">
+            <div class="book">
+              <div class="cover">剑</div>
+              <div class="book-info">
+                <div class="book-title">《剑来》</div>
+                <div class="meta">烽火戏诸侯 · 玄幻 / 仙侠 · 共 1,247 章</div>
+              </div>
+            </div>
+            <div class="progress">
+              <span>第 1247 / 1,247 章</span>
+              <div class="bar"><span style="width:99.6%"></span></div>
+              <span class="pct">99.6%</span>
+            </div>
+          </div>
+
+          <article class="reader-body">
+            <h1>第 1247 章 问道长生（三十六）</h1>
+            <div class="sub">来源 qidian.com · 抓取于 2026/06/06 15:42 · 3,124 字 · 阅读 12 分钟</div>
+
+            <p>小镇的雨季来得比往年早，泥泞的黄泥路被压出深深浅浅的脚印，檐下挂着的几串干辣椒被雨水打得透湿，颜色反倒比晴天时更鲜亮些。少年蹲在老槐树下，用一根树枝在积水里画着什么，画得很慢，仿佛每落一笔都要想一想这一笔该不该落。</p>
+
+            <p>老人拎着一壶刚烧开的水走过来，看着少年脚边那一片被搅得浑浊的水洼，摇摇头，把水壶搁在井沿上，自顾自地说了一句莫名其妙的话：「画龙画虎难画骨，知人知面不知心，这两句话并起来念，人这一辈子就过得差不多了。」</p>
+
+            <p>少年抬头看了一眼老人，没接话，又低下头去画。他画的是一条路，从脚下一直画到看不见的远处。路的两边点着几棵小树，歪歪扭扭，像是随手撒上去的。画到最后，他把树枝一丢，站起身来，拍了拍屁股上的土，看着那条路看了好一会儿。</p>
+
+            <p>「老先生，」少年终于开口，「我一直想问您一件事。」</p>
+
+            <p>老人挑了挑眉：「问。」</p>
+
+            <p>「这条路上，您走过几次？」</p>
+
+            <p>老人没回答这个问题，反倒笑了一下，从怀里摸出一只小小的油纸包，打开，是两块还温热的米糕，他把其中一块递给少年：「吃。」少年迟疑了一下，还是接过来。老人自己也拿了一块，咬了一口，嚼得很慢，像是舍不得咽下去，又像是在认真品尝每一粒米在齿间碎开的声响。</p>
+
+            <p>「人啊，」老人把剩下的半块米糕重新用油纸包好，小心塞回怀里，「走过的路和吃过的米糕其实是一回事。少一块就少一块，多一块就多一块，没法补。」</p>
+
+            <p>少年把米糕送进嘴里，米香混着油纸的味道，说不上好吃，但也不算难吃。两个人就这么站在井边，看了一阵雨。雨丝从屋檐上落下来，在他们面前织成一道半透明的帘子，把街对面那间关了门的小铺子隔在后面，看上去竟有几分好看。</p>
+
+            <p>「那我再问您，」少年咽下米糕，又道，「走错了一次，能不能再走一次？」</p>
+
+            <p>老人这一次没有笑。他抬眼望向雨幕之外、望向那条被少年画在地上的、此刻正被新的雨点一点一点抹去的路，半晌才说：「能。但不是走同一条。」</p>
+
+            <p>少年沉默了很久。雨渐渐小了，那条画在地上的路也淡了，只剩下几道浅浅的划痕，像极了一个上了年纪的人手背上的青筋。少年蹲下去，想再补两笔，把那条路画得清楚些，但树枝刚一落下，就被他自己收住了。</p>
+
+            <p>「不画了，」少年说，「画出来也不是原来那条。」</p>
+
+            <p>老人微微颔首，像是满意，又像是早就知道他会这么说。他拎起井沿上的水壶，转身往回走。走出几步，又停下来，头也不回地丢下一句：「明早天晴，跟我上山。」</p>
+          </article>
+
+          <div class="reader-foot">
+            <div class="pager">
+              <button><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>第 1246 章</button>
+              <button class="primary">第 1248 章<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+            </div>
+            <div class="actions">
+              <button title="字号"><svg viewBox="0 0 24 24"><path d="M3 7l4-4 4 4M7 3v14M21 7l-3-4-3 4M18 3v14"/></svg></button>
+              <button title="主题"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></button>
+              <button title="朗读"><svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zM15 9a4 4 0 010 6M18 6a8 8 0 010 12"/></svg></button>
+              <button title="书签"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z"/></svg></button>
+              <button title="分享"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Meta sidebar -->
+        <aside class="meta-pane" aria-label="章节元数据">
+          <h4>来源</h4>
+          <div class="src-card">
+            <span class="pip"></span>
+            <span class="name">qidian.com<small>健康 · 97.8% · 1.8s</small></span>
+          </div>
+
+          <h4>章节信息</h4>
+          <dl>
+            <div class="row"><dt>字数</dt><dd>3,124</dd></div>
+            <div class="row"><dt>预计阅读</dt><dd>12 分钟</dd></div>
+            <div class="row"><dt>抓取时间</dt><dd>06/06 15:42</dd></div>
+            <div class="row"><dt>抓取耗时</dt><dd>0.61s</dd></div>
+            <div class="row"><dt>解析规则</dt><dd>qidian-v3</dd></div>
+            <div class="row"><dt>章节 ID</dt><dd>ch-1247</dd></div>
+          </dl>
+
+          <h4>阅读主题</h4>
+          <div class="reader-themes" id="readerThemes">
+            <button class="theme-swatch active" data-theme="light" title="亮色" style="background:#ffffff;border-color:#e0e2e6;">
+              <span class="swatch-label">亮色</span>
+            </button>
+            <button class="theme-swatch" data-theme="sepia" title="护眼黄" style="background:#f4ecd8;border-color:#d4c8a8;">
+              <span class="swatch-label">护眼</span>
+            </button>
+            <button class="theme-swatch" data-theme="green" title="护眼绿" style="background:#e8f5e9;border-color:#c8e6c9;">
+              <span class="swatch-label">绿荫</span>
+            </button>
+            <button class="theme-swatch" data-theme="dark" title="暗色" style="background:#1a1a2e;border-color:#333355;">
+              <span class="swatch-label">暗色</span>
+            </button>
+          </div>
+
+          <h4>阅读控制</h4>
+          <div class="controls">
+            <button id="fontDown" title="缩小字体"><svg viewBox="0 0 24 24"><path d="M5 9l3-3 3 3M8 6v9"/></svg>A<sub style="font-size:9px;margin-left:1px">−</sub></button>
+            <button id="fontUp" title="放大字体"><svg viewBox="0 0 24 24"><path d="M16 9l3-3 3 3M19 6v9"/></svg>A<sub style="font-size:9px;margin-left:1px">+</sub></button>
+            <button><svg viewBox="0 0 24 24"><path d="M5 9l3-3 3 3M8 6v9M16 9l3-3 3 3M19 6v9"/></svg>行距</button>
+            <button><svg viewBox="0 0 24 24"><path d="M21 12.8V19a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6.2M16 3h5v5M9 15l12-12"/></svg>新窗口</button>
+          </div>
+
+          <h4>相关</h4>
+          <div class="controls stacked">
+            <button><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>标记为已读</button>
+            <button><svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>抓取所有章节</button>
+            <button><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/></svg>报告错误</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Theme toggle
+  (function(){
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-theme') || 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('legado-theme', next); } catch(e) {}
+      });
+    }
+  })();
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast success';
+    t.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>' + msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+  }
+
+  // TOC items and active switching
+  const tocItems = document.querySelectorAll('.toc-list li');
+  tocItems.forEach(li => {
+    li.addEventListener('click', () => {
+      tocItems.forEach(x => x.classList.remove('active'));
+      li.classList.add('active');
+      updateChapterDisplay(li);
+    });
+  });
+
+  function getCurrentIndex() {
+    const active = document.querySelector('.toc-list li.active');
+    if (!active) return -1;
+    return Array.from(tocItems).indexOf(active);
+  }
+
+  function selectChapterByIndex(idx) {
+    if (idx < 0 || idx >= tocItems.length) return;
+    tocItems.forEach(x => x.classList.remove('active'));
+    tocItems[idx].classList.add('active');
+    tocItems[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    updateChapterDisplay(tocItems[idx]);
+  }
+
+  function updateChapterDisplay(li) {
+    const num = li.querySelector('.num')?.textContent || '';
+    const title = li.querySelector('span:last-child')?.textContent || '';
+    const h1 = document.querySelector('.reader-body h1');
+    if (h1) h1.textContent = num + ' ' + title;
+    // Update crumb
+    const crumb = document.querySelector('.topbar .crumb');
+    if (crumb) crumb.textContent = '/ 《剑来》 · ' + num;
+  }
+
+  // Previous / Next chapter buttons in topbar
+  const topbarBtns = document.querySelectorAll('.topbar .btn');
+  topbarBtns.forEach(btn => {
+    if (btn.textContent.includes('上一章')) {
+      btn.addEventListener('click', () => {
+        const idx = getCurrentIndex();
+        if (idx > 0) selectChapterByIndex(idx - 1);
+        else showToast('已经是第一章了');
+      });
+    }
+    if (btn.textContent.includes('下一章')) {
+      btn.addEventListener('click', () => {
+        const idx = getCurrentIndex();
+        if (idx < tocItems.length - 1) selectChapterByIndex(idx + 1);
+        else showToast('已经是最后一章了');
+      });
+    }
+    if (btn.textContent.includes('目录')) {
+      btn.addEventListener('click', () => {
+        const toc = document.querySelector('.toc');
+        if (toc) toc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+    if (btn.textContent.includes('导出 EPUB')) {
+      btn.addEventListener('click', () => {
+        const title = document.querySelector('.reader-body h1')?.textContent || '章节';
+        const content = document.querySelector('.reader-body')?.innerText || '';
+        const blob = new Blob([title + '\n\n' + content], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '剑来-' + title.replace(/\s/g, '') + '.txt';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast('已导出「' + title + '」');
+      });
+    }
+  });
+
+  // Footer prev/next
+  const footBtns = document.querySelectorAll('.reader-foot .pager button');
+  if (footBtns.length >= 2) {
+    footBtns[0].addEventListener('click', () => {
+      const idx = getCurrentIndex();
+      if (idx > 0) selectChapterByIndex(idx - 1);
+      else showToast('已经是第一章了');
+    });
+    footBtns[1].addEventListener('click', () => {
+      const idx = getCurrentIndex();
+      if (idx < tocItems.length - 1) selectChapterByIndex(idx + 1);
+      else showToast('已经是最后一章了');
+    });
+  }
+
+  // TOC search
+  const tocSearchInput = document.querySelector('.toc-search input');
+  if (tocSearchInput) {
+    tocSearchInput.addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      tocItems.forEach(li => {
+        const text = li.textContent.toLowerCase();
+        li.style.display = (!q || text.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  // Reader theme switching
+  (function(){
+    const themes = {
+      light:  { bg: '#ffffff', fg: '#181d26', muted: 'rgba(4, 14, 32, 0.69)' },
+      sepia:  { bg: '#f4ecd8', fg: '#5b4636', muted: 'rgba(91, 70, 54, 0.6)' },
+      green:  { bg: '#e8f5e9', fg: '#2e4a30', muted: 'rgba(46, 74, 48, 0.6)' },
+      dark:   { bg: '#1a1a2e', fg: '#c8c8d4', muted: 'rgba(200, 200, 212, 0.55)' }
+    };
+    const body = document.querySelector('.reader-body');
+    const swatches = document.querySelectorAll('.theme-swatch');
+    if (!body || !swatches.length) return;
+    function applyTheme(name) {
+      const t = themes[name];
+      if (!t) return;
+      body.setAttribute('data-reader', name);
+      body.style.setProperty('--r-bg', t.bg);
+      body.style.setProperty('--r-fg', t.fg);
+      body.style.setProperty('--r-muted', t.muted);
+    }
+    const saved = localStorage.getItem('legado-reader-theme') || 'light';
+    applyTheme(saved);
+    swatches.forEach(s => s.classList.toggle('active', s.dataset.theme === saved));
+    swatches.forEach(s => {
+      s.addEventListener('click', () => {
+        const name = s.dataset.theme;
+        applyTheme(name);
+        swatches.forEach(x => x.classList.toggle('active', x === s));
+        try { localStorage.setItem('legado-reader-theme', name); } catch(e) {}
+      });
+    });
+  })();
+
+  // Font size controls
+  (function(){
+    const body = document.querySelector('.reader-body');
+    if (!body) return;
+    const MIN = 14, MAX = 24, STEP = 1, DEFAULT = 17;
+    let fs = DEFAULT;
+    try {
+      const saved = localStorage.getItem('legado-reader-fontsize');
+      if (saved) { const n = parseInt(saved, 10); if (n >= MIN && n <= MAX) fs = n; }
+    } catch(e){}
+    function applyFs() {
+      body.style.setProperty('--reader-fs', fs + 'px');
+      try { localStorage.setItem('legado-reader-fontsize', String(fs)); } catch(e){}
+    }
+    applyFs();
+    const down = document.getElementById('fontDown');
+    const up = document.getElementById('fontUp');
+    if (down) down.addEventListener('click', () => { if (fs > MIN) { fs -= STEP; applyFs(); } });
+    if (up) up.addEventListener('click', () => { if (fs < MAX) { fs += STEP; applyFs(); } });
+  })();
+
+  // Footer action buttons
+  const footActions = document.querySelectorAll('.reader-foot .actions button');
+  footActions.forEach(btn => {
+    const title = btn.getAttribute('title');
+    btn.addEventListener('click', () => {
+      if (title === '朗读') {
+        if (window.speechSynthesis) {
+          if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            showToast('朗读已停止');
+            return;
+          }
+          const text = document.querySelector('.reader-body')?.innerText || '';
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'zh-CN';
+          utterance.rate = 0.9;
+          window.speechSynthesis.speak(utterance);
+          showToast('开始朗读当前章节');
+        } else {
+          showToast('浏览器不支持语音朗读');
+        }
+      } else if (title === '书签') {
+        const idx = getCurrentIndex();
+        try {
+          const bookmarks = JSON.parse(localStorage.getItem('legado-bookmarks') || '[]');
+          const exists = bookmarks.indexOf(idx);
+          if (exists >= 0) { bookmarks.splice(exists, 1); showToast('已移除书签'); }
+          else { bookmarks.push(idx); showToast('已添加书签'); }
+          localStorage.setItem('legado-bookmarks', JSON.stringify(bookmarks));
+        } catch(e) { showToast('已添加书签'); }
+      } else if (title === '分享') {
+        const title2 = document.querySelector('.reader-body h1')?.textContent || '章节';
+        const shareData = { title: '剑来 - ' + title2, text: title2, url: window.location.href };
+        if (navigator.share) {
+          navigator.share(shareData).catch(() => {});
+        } else {
+          navigator.clipboard?.writeText(window.location.href).then(() => showToast('链接已复制到剪贴板'));
+        }
+      } else if (title === '字号') {
+        showToast('使用右侧面板的 A−/A+ 按钮调整字号');
+      } else if (title === '主题') {
+        showToast('使用右侧面板的阅读主题切换');
+      }
+    });
+  });
+
+  // Meta pane controls
+  const metaButtons = document.querySelectorAll('.meta-pane .controls button');
+  metaButtons.forEach(btn => {
+    const text = btn.textContent.trim();
+    btn.addEventListener('click', () => {
+      if (text.includes('新窗口')) {
+        const content = document.querySelector('.reader-body')?.innerHTML || '';
+        const w = window.open('', '_blank');
+        if (w) {
+          w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>剑来 - 阅读</title><style>body{max-width:680px;margin:40px auto;padding:0 20px;font-family:Georgia,serif;line-height:1.9;color:#181d26}h1{text-align:center;font-size:24px}p{text-indent:2em;margin-bottom:1.2em}</style></head><body>' + content + '</body></html>');
+          w.document.close();
+        }
+      } else if (text.includes('标记为已读')) {
+        try { localStorage.setItem('legado-read-ch-1247', 'true'); } catch(e) {}
+        showToast('已标记为已读');
+      } else if (text.includes('抓取所有章节')) {
+        showToast('已开始抓取《剑来》所有章节…');
+      } else if (text.includes('报告错误')) {
+        showToast('已提交错误报告，感谢反馈');
+      } else if (text.includes('行距')) {
+        const body = document.querySelector('.reader-body');
+        if (body) {
+          const current = parseFloat(getComputedStyle(body.querySelector('p')).lineHeight);
+          const fs = parseFloat(getComputedStyle(body.querySelector('p')).fontSize);
+          const newLh = current / fs > 2.1 ? 1.6 : (current / fs > 1.8 ? 2.0 : 2.2);
+          body.querySelectorAll('p').forEach(p => p.style.lineHeight = newLh);
+          showToast('行距已调整为 ' + newLh);
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>

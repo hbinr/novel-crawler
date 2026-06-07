@@ -1,0 +1,40 @@
+.log-stream {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  line-height: 1.45;
+  color: var(--text-hi);
+  overflow: auto;
+  max-height: 70vh;
+  padding: 8px 0;
+}
+.log-line {
+  display: grid;
+  grid-template-columns: 88px 60px 1fr;
+  gap: 12px;
+  padding: 0 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.log-line .ts { color: var(--text-lo); }
+.log-line .lvl { font-weight: 500; }
+.log-line .lvl-info { color: var(--info); }
+.log-line .lvl-warn { color: var(--warning); }
+.log-line .lvl-error { color: var(--error); }
+.log-line .lvl-debug { color: var(--text-lo); }
+.log-line .msg { color: var(--text-hi); }
+.log-line.fresh {
+  background: var(--primary-glow-2);
+  animation: log-fade 1.5s var(--ease-out) forwards;
+}
+@keyframes log-fade {
+  from { background: var(--primary-glow-5); }
+  to { background: transparent; }
+}
+.log-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-lo);
+}

@@ -1,0 +1,52 @@
+/* Breadcrumb — 紧凑、低对比，让 detail 页有"归属" */
+.breadcrumb {
+  font-size: 12px;
+  color: var(--text-lo);
+  margin-bottom: 8px;
+}
+.breadcrumb ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.breadcrumb li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.breadcrumb .crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  color: var(--text-mid);
+  text-decoration: none;
+  transition: background var(--dur-micro) var(--ease-out),
+              color var(--dur-micro) var(--ease-out);
+}
+.breadcrumb .crumb:hover {
+  background: var(--tint-1);
+  color: var(--text-hi);
+}
+.breadcrumb .crumb.current {
+  color: var(--text-hi);
+  font-weight: 500;
+}
+.breadcrumb .crumb-ico {
+  display: inline-grid;
+  place-items: center;
+  color: inherit;
+  opacity: 0.85;
+}
+.breadcrumb .sep {
+  color: var(--text-lo);
+  display: inline-grid;
+  place-items: center;
+  opacity: 0.6;
+}

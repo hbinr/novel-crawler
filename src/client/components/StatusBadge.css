@@ -1,0 +1,48 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: var(--r-badge);
+  font-size: var(--fs-11);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: var(--bg-2);
+  color: var(--text-mid);
+  white-space: nowrap;
+}
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+/* 5 状态颜色映射 */
+.badge-queued { color: var(--queued); }
+.badge-running {
+  color: var(--running);
+}
+.badge-running .badge-dot {
+  animation: pulse 1.4s var(--ease-out) infinite;
+}
+.badge-success { color: var(--success); }
+.badge-partial { color: var(--warning); }
+.badge-failed,
+.badge-error { color: var(--error); }
+.badge-canceled,
+.badge-pending,
+.badge-skipped { color: var(--text-lo); }
+.badge-downloading { color: var(--info); }
+.badge-done { color: var(--success); }
+.badge-info { color: var(--info); }
+.badge-warn,
+.badge-warning { color: var(--warning); }
+.badge-debug { color: var(--text-lo); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
